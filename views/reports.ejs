@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reports & Analytics | PGP</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .container {
+      max-width: 1400px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .content-section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .filter-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .filter-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #333;
+    }
+    .filter-group input, .filter-group select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .export-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .btn-primary { background: #007bff; color: white; }
+    .btn-success { background: #28a745; color: white; }
+    .btn-danger { background: #dc3545; color: white; }
+    .btn-info { background: #17a2b8; color: white; }
+    .btn-warning { background: #ffc107; color: #333; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    th {
+      background: #f8f9fa;
+      font-weight: 600;
+    }
+    .alert {
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    .alert-warning {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      color: #856404;
+    }
+    .alert-danger {
+      background: #f8d7da;
+      border-left: 4px solid #dc3545;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>📊 Reports & Analytics</h1>
+      </div>
+      <div>
+        <button class="btn btn-primary" onclick="window.location.href='/role-dashboard.html'">← Back to Dashboard</button>
+        <button class="btn btn-danger" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Low Attendance Alerts -->
+    <div id="lowAttendanceSection" class="content-section" style="display: none;">
+      <h2>🔔 Low Attendance Alerts</h2>
+      <div id="lowAttendanceList"></div>
+    </div>
+
+    <!-- Filters -->
+    <div class="content-section">
+      <h2>Generate Attendance Report</h2>
+      <div class="filter-section">
+        <div class="filter-group">
+          <label>Start Date</label>
+          <input type="date" id="startDate" />
+        </div>
+        <div class="filter-group">
+          <label>End Date</label>
+          <input type="date" id="endDate" />
+        </div>
+        <div class="filter-group">
+          <label>Class</label>
+          <select id="classFilter">
+            <option value="">All Classes</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="generateReport()">Generate Report</button>
+      
+      <div class="export-buttons" id="exportButtons" style="display: none;">
+        <button class="btn btn-success" onclick="exportCSV()">📄 Export CSV</button>
+        <button class="btn btn-info" onclick="exportExcel()">📊 Export Excel</button>
+        <button class="btn btn-warning" onclick="exportPDF()">📋 Export PDF</button>
+      </div>
+    </div>
+
+    <!-- Report Results -->
+    <div class="content-section" id="reportSection" style="display: none;">
+      <h2>Attendance Summary</h2>
+      <table id="reportTable">
+        <thead>
+          <tr>
+            <th>Roll Number</th>
+            <th>Name</th>
+            <th>Class</th>
+            <th>Present</th>
+            <th>Absent</th>
+            <th>Total</th>
+            <th>Percentage</th>
+          </tr>
+        </thead>
+        <tbody id="reportTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) window.location.href = "/";
+
+    let currentFilters = {};
+
+    // Load classes for filter
+    async function loadClasses() {
+      try {
+        const response = await fetch("/students", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const result = await response.json();
+        if (result.success) {
+          const classes = [...new Set(result.data.map(s => s.class))];
+          const select = document.getElementById("classFilter");
+          classes.forEach(c => {
+            select.innerHTML += `<option value="${c}">${c}</option>`;
+          });
+        }
+      } catch (error) {
+        console.error("Load classes error:", error);
+      }
+    }
+
+    // Load low attendance students
+    async function loadLowAttendance() {
+      try {
+        const response = await fetch("/reports/low-attendance?threshold=75", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const result = await response.json();
+        
+        if (result.success && result.data.length > 0) {
+          document.getElementById("lowAttendanceSection").style.display = "block";
+          const list = document.getElementById("lowAttendanceList");
+          list.innerHTML = "";
+          
+          result.data.forEach(item => {
+            const alert = document.createElement("div");
+            alert.className = item.percentage < 50 ? "alert alert-danger" : "alert alert-warning";
+            alert.innerHTML = `
+              <strong>${item.student.name} (${item.student.rollNumber})</strong> - ${item.student.class}<br>
+              Attendance: ${item.present}/${item.total} (${item.percentage}%) - 
+              <strong>${item.percentage < 50 ? 'CRITICAL' : 'WARNING'}</strong>
+            `;
+            list.appendChild(alert);
+          });
+        }
+      } catch (error) {
+        console.error("Low attendance error:", error);
+      }
+    }
+
+    async function generateReport() {
+      const startDate = document.getElementById("startDate").value;
+      const endDate = document.getElementById("endDate").value;
+      const className = document.getElementById("classFilter").value;
+
+      currentFilters = { startDate, endDate, className };
+
+      let url = "/reports/attendance?";
+      if (startDate) url += `startDate=${startDate}&`;
+      if (endDate) url += `endDate=${endDate}&`;
+      if (className) url += `className=${className}&`;
+
+      try {
+        const response = await fetch(url, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const result = await response.json();
+
+        if (result.success) {
+          displayReport(result.data);
+          document.getElementById("exportButtons").style.display = "flex";
+        } else {
+          alert("Error generating report");
+        }
+      } catch (error) {
+        console.error("Report error:", error);
+        alert("Error generating report");
+      }
+    }
+
+    function displayReport(data) {
+      const tbody = document.getElementById("reportTableBody");
+      tbody.innerHTML = "";
+
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No data found</td></tr>';
+        return;
+      }
+
+      data.forEach(item => {
+        const row = `
+          <tr>
+            <td>${item.student.rollNumber}</td>
+            <td>${item.student.name}</td>
+            <td>${item.student.class}</td>
+            <td style="color: green; font-weight: bold;">${item.present}</td>
+            <td style="color: red; font-weight: bold;">${item.absent}</td>
+            <td>${item.total}</td>
+            <td>
+              <strong style="color: ${item.percentage >= 75 ? 'green' : item.percentage >= 50 ? 'orange' : 'red'}">
+                ${item.percentage}%
+              </strong>
+            </td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+      });
+
+      document.getElementById("reportSection").style.display = "block";
+    }
+
+    // ✅ FIXED: Export CSV with token in headers
+    async function exportCSV() {
+      const { startDate, endDate, className } = currentFilters;
+      let url = `/reports/export/csv?`;
+      if (startDate) url += `startDate=${startDate}&`;
+      if (endDate) url += `endDate=${endDate}&`;
+      if (className) url += `className=${className}`;
+      
+      try {
+        const response = await fetch(url, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const blob = await response.blob();
+          const downloadUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = `attendance-report-${Date.now()}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(downloadUrl);
+          alert("CSV downloaded successfully!");
+        } else {
+          alert("Error exporting CSV");
+        }
+      } catch (error) {
+        console.error("Export error:", error);
+        alert("Error exporting CSV");
+      }
+    }
+
+    // ✅ FIXED: Export Excel with token in headers
+    async function exportExcel() {
+      const { startDate, endDate, className } = currentFilters;
+      let url = `/reports/export/excel?`;
+      if (startDate) url += `startDate=${startDate}&`;
+      if (endDate) url += `endDate=${endDate}&`;
+      if (className) url += `className=${className}`;
+      
+      try {
+        const response = await fetch(url, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const blob = await response.blob();
+          const downloadUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = `attendance-report-${Date.now()}.xlsx`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(downloadUrl);
+          alert("Excel downloaded successfully!");
+        } else {
+          alert("Error exporting Excel");
+        }
+      } catch (error) {
+        console.error("Export error:", error);
+        alert("Error exporting Excel");
+      }
+    }
+
+    // ✅ FIXED: Export PDF with token in headers
+    async function exportPDF() {
+      const { startDate, endDate, className } = currentFilters;
+      let url = `/reports/export/pdf?`;
+      if (startDate) url += `startDate=${startDate}&`;
+      if (endDate) url += `endDate=${endDate}&`;
+      if (className) url += `className=${className}`;
+      
+      try {
+        const response = await fetch(url, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const blob = await response.blob();
+          const downloadUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = `attendance-report-${Date.now()}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(downloadUrl);
+          alert("PDF downloaded successfully!");
+        } else {
+          alert("Error exporting PDF");
+        }
+      } catch (error) {
+        console.error("Export error:", error);
+        alert("Error exporting PDF");
+      }
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "/";
+    }
+
+    // Load on page load
+    loadClasses();
+    loadLowAttendance();
+  </script>
+</body>
+</html>

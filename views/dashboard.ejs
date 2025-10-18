@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= pageTitle %></title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <h1>Attendance Dashboard</h1>
+  <form id="attendanceForm">
+    <select id="studentId" required>
+      <% students.forEach(student => { %>
+        <option value="<%= student.id %>">
+          <%= student.name %> (<%= student.rollNumber %>)
+        </option>
+      <% }) %>
+    </select>
+    <select id="status">
+      <option value="Present">Present</option>
+      <option value="Absent">Absent</option>
+    </select>
+    <button type="submit">Mark Attendance</button>
+  </form>
+
+  <script>
+    document.getElementById("attendanceForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const studentId = document.getElementById("studentId").value;
+      const status = document.getElementById("status").value;
+
+      const response = await fetch("/attendance/mark", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentId, status }),
+      });
+
+      const data = await response.json();
+      alert(data.message);
+    });
+  </script>
+</body>
+</html>
