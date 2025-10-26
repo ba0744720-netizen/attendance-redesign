@@ -7,16 +7,17 @@
   },
   "main": "index.js",
   "scripts": {
-  "tw:watch": "tailwindcss -i ./src/input.css -o ./src/output.css --watch",
-  "start": "node server.js",
-  "dev": "nodemon server.js"
-},
+    "tw:watch": "tailwindcss -i ./src/input.css -o ./src/output.css --watch",
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "body-parser": "^2.2.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
