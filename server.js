@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 3000;
 // ========================================
 // ✅ MODELS
 // ========================================
-const { Student, User, Timetable, sequelize } = require("./models");
+const { Student, User, sequelize } = require("./models");
 
 // ========================================
 // ⚙️ MIDDLEWARE
@@ -69,26 +69,10 @@ const seedDatabase = async () => {
                     password: hashedPassword,
                     role: "teacher",
                 },
-                {
-                    staffId: "ADV001",
-                    name: "Advisor Mary",
-                    email: "advisor@pgp.com",
-                    password: hashedPassword,
-                    role: "advisor",
-                },
-                {
-                    staffId: "PRI001",
-                    name: "Principal Smith",
-                    email: "principal@pgp.com",
-                    password: hashedPassword,
-                    role: "principal",
-                },
             ]);
             console.log("👥 Demo users added");
             console.log("\n✅ LOGIN CREDENTIALS:");
             console.log("   📧 Teacher: teacher@pgp.com | 🔑 password123");
-            console.log("   📧 Advisor: advisor@pgp.com | 🔑 password123");
-            console.log("   📧 Principal: principal@pgp.com | 🔑 password123");
             console.log("   📧 Admin: admin@pgp.com | 🔑 password123\n");
         } else {
             console.log("📝 Users already exist in database");
@@ -106,56 +90,70 @@ setTimeout(() => {
 // ========================================
 // 🌐 API ROUTES
 // ========================================
+
+// Import routes
 const authRoutes = require("./routes/auth");
 const attendanceRoutes = require("./routes/attendance");
-const dashboardRoutes = require("./routes/dashboard");
 const studentsRoutes = require("./routes/students");
 const reportsRoutes = require("./routes/reports");
-const timetableRoutes = require("./routes/timetable");
+const dashboardRoutes = require("./routes/dashboard");
 
-// API Routes
+// Check if admin.js exists before requiring it
+let adminRoutes;
+try {
+    adminRoutes = require("./routes/admin");
+} catch (error) {
+    console.log("⚠️  Admin routes not found, creating placeholder...");
+}
+
+// Use API Routes
 app.use("/auth", authRoutes);
 app.use("/attendance", attendanceRoutes);
-app.use("/api/dashboard", dashboardRoutes);
 app.use("/students", studentsRoutes);
 app.use("/reports", reportsRoutes);
-app.use("/timetable", timetableRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+
+// Only use admin routes if they exist
+if (adminRoutes) {
+    app.use("/api/admin", adminRoutes);
+}
 
 // ========================================
-// 📄 PAGE ROUTES (NO AUTH MIDDLEWARE) 
-// ⚠️ IMPORTANT: No authenticateToken middleware on these routes!
-// Client-side JavaScript in each EJS file handles authentication
+// 📄 PAGE ROUTES
 // ========================================
 
 // Public routes
 app.get("/", (req, res) => res.redirect('/login'));
 app.get("/login", (req, res) => res.render("login"));
-app.get("/register", (req, res) => res.render("register"));
 
-// Protected pages (authentication handled by client-side JavaScript)
+// Teacher Dashboard
 app.get("/dashboard", (req, res) => {
-    console.log("✅ Dashboard page accessed - rendering without server auth");
-    res.render("dashboard");
+    console.log("✅ Teacher dashboard accessed");
+    res.render("teacher-dashboard");
 });
 
+// Admin Dashboard
+app.get("/admin", (req, res) => {
+    console.log("✅ Admin dashboard accessed");
+    res.render("admin-dashboard");
+});
+
+// Admin User Management
+app.get("/admin/users", (req, res) => {
+    console.log("✅ Admin user management accessed");
+    res.render("admin-users");
+});
+
+// Student Management (Teachers & Admins)
 app.get("/student-management", (req, res) => {
-    console.log("✅ Student management page accessed - rendering without server auth");
+    console.log("✅ Student management page accessed");
     res.render("student-management");
 });
 
+// Reports Page (Teachers & Admins)
 app.get("/reports-page", (req, res) => {
-    console.log("✅ Reports page accessed - rendering without server auth");
+    console.log("✅ Reports page accessed");
     res.render("reports");
-});
-
-app.get("/role-dashboard.html", (req, res) => {
-    console.log("✅ Role dashboard page accessed - rendering without server auth");
-    res.render("role-dashboard");
-});
-
-app.get("/timetable-management", (req, res) => {
-    console.log("✅ Timetable management page accessed - rendering without server auth");
-    res.render("timetable-management");
 });
 
 // ========================================

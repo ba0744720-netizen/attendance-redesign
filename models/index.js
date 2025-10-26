@@ -4,8 +4,6 @@ const { Sequelize, DataTypes } = require("sequelize");
 // CONNECT TO Supabase PostgreSQL
 // ========================================
 
-// Option 1: Use DATABASE_URL (if available)
-// Option 2: Use individual environment variables
 const sequelize = process.env.DATABASE_URL 
   ? new Sequelize(process.env.DATABASE_URL, {
       dialect: "postgres",
@@ -56,20 +54,6 @@ sequelize.authenticate()
   })
   .catch(err => {
     console.error("❌ Database connection error:", err.message);
-    console.error("\n🔍 Connection Details:");
-    if (process.env.DATABASE_URL) {
-      console.error("Using DATABASE_URL from .env");
-      console.error("Check if your DATABASE_URL is correct");
-    } else {
-      console.error(`Host: ${process.env.DB_HOST}`);
-      console.error(`Port: ${process.env.DB_PORT}`);
-      console.error(`Database: ${process.env.DB_NAME}`);
-      console.error(`User: ${process.env.DB_USER}`);
-    }
-    console.error("\n💡 Tips:");
-    console.error("1. Check if your Supabase project is paused");
-    console.error("2. Verify connection string in Supabase Dashboard → Settings → Database");
-    console.error("3. Make sure to use the Connection Pooling URL (port 6543)");
   });
 
 // ========================================
@@ -97,40 +81,9 @@ const User = sequelize.define("User", {
   email: { type: DataTypes.STRING, allowNull: false, unique: true },
   password: { type: DataTypes.STRING, allowNull: false },
   role: { 
-    type: DataTypes.ENUM('admin', 'teacher', 'advisor', 'principal', 'hod'), 
+    type: DataTypes.ENUM('admin', 'teacher'), 
     allowNull: false,
     defaultValue: 'teacher'
-  },
-});
-
-const Timetable = sequelize.define("Timetable", {
-  day: { 
-    type: DataTypes.STRING, 
-    allowNull: false 
-  },
-  periodNumber: { 
-    type: DataTypes.INTEGER, 
-    allowNull: false 
-  },
-  subject: { 
-    type: DataTypes.STRING, 
-    allowNull: false 
-  },
-  className: { 
-    type: DataTypes.STRING, 
-    allowNull: false 
-  },
-  startTime: { 
-    type: DataTypes.STRING, 
-    allowNull: false 
-  },
-  endTime: { 
-    type: DataTypes.STRING, 
-    allowNull: false 
-  },
-  color: { 
-    type: DataTypes.STRING, 
-    defaultValue: "white" 
   },
 });
 
@@ -141,11 +94,8 @@ const Timetable = sequelize.define("Timetable", {
 Student.hasMany(Attendance, { onDelete: "CASCADE" });
 Attendance.belongsTo(Student);
 
-User.hasMany(Timetable, { as: 'assignedPeriods' });
-Timetable.belongsTo(User, { as: 'teacher' });
-
 // ========================================
-// SYNC DATABASE (Supabase Compatible)
+// SYNC DATABASE
 // ========================================
 
 sequelize.sync({ alter: true })
@@ -160,4 +110,4 @@ sequelize.sync({ alter: true })
 // EXPORT MODELS
 // ========================================
 
-module.exports = { sequelize, Student, Attendance, User, Timetable };
+module.exports = { sequelize, Student, Attendance, User };
