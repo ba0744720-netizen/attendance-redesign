@@ -100,7 +100,7 @@ router.post("/mark", verifyToken, async (req, res) => {
   }
 });
 
-// 📌 POST Mark Bulk Attendance (Mark multiple students at once)
+// 📌 POST Mark Bulk Attendance (Already exists in your code, but verify)
 router.post("/mark-bulk", verifyToken, async (req, res) => {
   try {
     const { students, date } = req.body;

@@ -106,6 +106,32 @@ sequelize.sync({ alter: true })
     console.error("❌ Database sync error:", err.message);
   });
 
+//===========================================
+//
+//===========================================
+const Student = sequelize.define("Student", {
+  name: { type: DataTypes.STRING, allowNull: false },
+  rollNumber: { type: DataTypes.STRING, allowNull: false, unique: true },
+  class: { type: DataTypes.STRING, allowNull: false },
+  
+  // ✅ ADD THESE NEW FIELDS
+  course: { 
+    type: DataTypes.STRING, 
+    allowNull: true,
+    defaultValue: 'B.Tech' 
+  },
+  year: { 
+    type: DataTypes.STRING, 
+    allowNull: true,
+    defaultValue: 'III' 
+  },
+  branch: { 
+    type: DataTypes.STRING, 
+    allowNull: true,
+    defaultValue: 'CSE' 
+  }
+});
+
 // ========================================
 // EXPORT MODELS
 // ========================================
