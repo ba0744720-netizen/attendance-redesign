@@ -57,13 +57,28 @@ sequelize.authenticate()
   });
 
 // ========================================
-// DEFINE MODELS
+// DEFINE MODELS (✅ Fixed - Only defined ONCE)
 // ========================================
 
 const Student = sequelize.define("Student", {
   name: { type: DataTypes.STRING, allowNull: false },
   rollNumber: { type: DataTypes.STRING, allowNull: false, unique: true },
   class: { type: DataTypes.STRING, allowNull: false },
+  course: { 
+    type: DataTypes.STRING, 
+    allowNull: true,
+    defaultValue: 'B.Tech' 
+  },
+  year: { 
+    type: DataTypes.STRING, 
+    allowNull: true,
+    defaultValue: 'III' 
+  },
+  branch: { 
+    type: DataTypes.STRING, 
+    allowNull: true,
+    defaultValue: 'CSE' 
+  }
 });
 
 const Attendance = sequelize.define("Attendance", {
@@ -105,32 +120,6 @@ sequelize.sync({ alter: true })
   .catch(err => {
     console.error("❌ Database sync error:", err.message);
   });
-
-//===========================================
-//
-//===========================================
-const Student = sequelize.define("Student", {
-  name: { type: DataTypes.STRING, allowNull: false },
-  rollNumber: { type: DataTypes.STRING, allowNull: false, unique: true },
-  class: { type: DataTypes.STRING, allowNull: false },
-  
-  // ✅ ADD THESE NEW FIELDS
-  course: { 
-    type: DataTypes.STRING, 
-    allowNull: true,
-    defaultValue: 'B.Tech' 
-  },
-  year: { 
-    type: DataTypes.STRING, 
-    allowNull: true,
-    defaultValue: 'III' 
-  },
-  branch: { 
-    type: DataTypes.STRING, 
-    allowNull: true,
-    defaultValue: 'CSE' 
-  }
-});
 
 // ========================================
 // EXPORT MODELS
