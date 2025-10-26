@@ -684,57 +684,49 @@
 
         // ✅✅✅ FIXED LOGIN FORM - THIS IS THE IMPORTANT PART ✅✅✅
         document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const rememberMe = document.getElementById('remember').checked;
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const rememberMe = document.getElementById('remember').checked;
+    
+    const loginBtn = document.querySelector('.login-btn');
+    loginBtn.textContent = 'Logging in...';
+    loginBtn.disabled = true;
+    
+    fetch('/auth/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) {
+            // ✅ Save token and user info
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('userName', data.user.name);
+            localStorage.setItem('userRole', data.user.role);
             
-            errorMessage.classList.remove('show');
-            document.body.classList.remove('error-state');
+            if(rememberMe) {
+                localStorage.setItem('rememberEmail', email);
+            }
             
-            const loginBtn = document.querySelector('.login-btn');
-            const originalText = loginBtn.textContent;
-            loginBtn.textContent = 'Logging in...';
-            loginBtn.disabled = true;
-            
-            fetch('/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if(data.success) {
-                    // ✅ FIXED: Save with correct keys that dashboard expects
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('userName', data.user.name);
-                    localStorage.setItem('userRole', data.user.role);
-                    
-                    if(rememberMe) {
-                        localStorage.setItem('rememberEmail', email);
-                    }
-                    
-                    // ✅ FIXED: Redirect to the correct dashboard page
-                    window.location.href = "/dashboard";
-                } else {
-                    document.body.classList.add('error-state');
-                    errorMessage.textContent = data.message || 'Invalid credentials';
-                    errorMessage.classList.add('show');
-                    loginBtn.textContent = originalText;
-                    loginBtn.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.body.classList.add('error-state');
-                errorMessage.textContent = 'Login failed. Please try again.';
-                errorMessage.classList.add('show');
-                loginBtn.textContent = originalText;
-                loginBtn.disabled = false;
-            });
-        });
+            // ✅ Redirect to dashboard
+            window.location.href = "/dashboard";
+        } else {
+            alert(data.message || 'Invalid credentials');
+            loginBtn.textContent = 'Login';
+            loginBtn.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Login failed. Please try again.');
+        loginBtn.textContent = 'Login';
+        loginBtn.disabled = false;
+    });
+});
 
         // Register form
         document.getElementById('registerForm').addEventListener('submit', function(e) {

@@ -1,43 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><%= pageTitle %></title>
-  <link rel="stylesheet" href="/css/style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PGP Attendance Tracker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #003d82 0%, #0055b8 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+        
+        .welcome-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .welcome-title {
+            font-size: 32px;
+            color: #003d82;
+            margin-bottom: 10px;
+        }
+        
+        .user-info {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #003d82 0%, #0055b8 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,61,130,0.3);
+        }
+        
+        .logout-btn {
+            background: #dc3545;
+        }
+    </style>
 </head>
 <body>
-  <h1>Attendance Dashboard</h1>
-  <form id="attendanceForm">
-    <select id="studentId" required>
-      <% students.forEach(student => { %>
-        <option value="<%= student.id %>">
-          <%= student.name %> (<%= student.rollNumber %>)
-        </option>
-      <% }) %>
-    </select>
-    <select id="status">
-      <option value="Present">Present</option>
-      <option value="Absent">Absent</option>
-    </select>
-    <button type="submit">Mark Attendance</button>
-  </form>
-
-  <script>
-    document.getElementById("attendanceForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const studentId = document.getElementById("studentId").value;
-      const status = document.getElementById("status").value;
-
-      const response = await fetch("/attendance/mark", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentId, status }),
-      });
-
-      const data = await response.json();
-      alert(data.message);
-    });
-  </script>
+    <div class="header">
+        <h1>PGP Attendance Tracker</h1>
+    </div>
+    
+    <div class="container">
+        <div class="welcome-card">
+            <h1 class="welcome-title">Welcome!</h1>
+            <p class="user-info">
+                <strong id="userName">Loading...</strong><br>
+                Role: <span id="userRole">Loading...</span>
+            </p>
+            
+            <div>
+                <a href="/student-management" class="btn">Manage Students</a>
+                <a href="/reports-page" class="btn">View Reports</a>
+                <button onclick="logout()" class="btn logout-btn">Logout</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Get user data from localStorage
+        const userName = localStorage.getItem('userName');
+        const userRole = localStorage.getItem('userRole');
+        
+        // Display user info
+        if (userName && userRole) {
+            document.getElementById('userName').textContent = userName;
+            document.getElementById('userRole').textContent = userRole.toUpperCase();
+        } else {
+            // If no user data, redirect to login
+            window.location.href = '/login';
+        }
+        
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login';
+        }
+    </script>
 </body>
 </html>
