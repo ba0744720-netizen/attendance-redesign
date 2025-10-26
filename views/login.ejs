@@ -662,7 +662,7 @@
             }
         });
 
-        // ✅✅✅ FIXED LOGIN FORM HANDLER ✅✅✅
+        // ✅✅✅ UPDATED LOGIN FORM HANDLER WITH ROLE-BASED REDIRECT ✅✅✅
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -703,10 +703,17 @@
                         localStorage.setItem('rememberEmail', email);
                     }
                     
-                    console.log('✅ Login successful! Redirecting to dashboard...');
+                    console.log('✅ Login successful!');
+                    console.log('👤 User Role:', data.user.role);
                     
-                    // ✅ Redirect to dashboard
-                    window.location.href = '/dashboard';
+                    // ✅ REDIRECT BASED ON ROLE
+                    if(data.user.role === 'admin') {
+                        console.log('🔐 Redirecting to Admin Dashboard...');
+                        window.location.href = '/admin';
+                    } else {
+                        console.log('👨‍🏫 Redirecting to Teacher Dashboard...');
+                        window.location.href = '/dashboard';
+                    }
                 } else {
                     throw new Error(data.message || 'Invalid response from server');
                 }

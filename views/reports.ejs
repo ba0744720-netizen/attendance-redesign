@@ -163,7 +163,12 @@
 
   <script>
     const token = localStorage.getItem("token");
-    if (!token) window.location.href = "/";
+if (!token) {
+  alert("Please login to access reports");
+  window.location.href = "/login";
+}
+
+console.log("✅ Reports accessed by:", localStorage.getItem("userRole"));
 
     let currentFilters = {};
 

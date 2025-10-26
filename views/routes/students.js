@@ -19,7 +19,7 @@ const verifyToken = (req, res, next) => {
 };
 
 // Check if user is advisor or principal
-const checkAdvisorOrPrincipal = (req, res, next) => {
+const verifyToken = (req, res, next) => {
   if (req.user.role !== "advisor" && req.user.role !== "principal") {
     return res.status(403).json({ 
       success: false, 
@@ -57,7 +57,7 @@ router.get("/:id", verifyToken, async (req, res) => {
 });
 
 // 📌 POST Create Student (Advisor/Principal only)
-router.post("/create", verifyToken, checkAdvisorOrPrincipal, async (req, res) => {
+router.post("/create", verifyToken,  async (req, res) => {
   try {
     const { name, rollNumber, className } = req.body;
 
@@ -88,7 +88,7 @@ router.post("/create", verifyToken, checkAdvisorOrPrincipal, async (req, res) =>
 });
 
 // 📌 PUT Update Student (Advisor/Principal only)
-router.put("/update/:id", verifyToken, checkAdvisorOrPrincipal, async (req, res) => {
+router.put("/update/:id", verifyToken,  async (req, res) => {
   try {
     const { id } = req.params;
     const { name, rollNumber, className } = req.body;
@@ -127,7 +127,7 @@ router.put("/update/:id", verifyToken, checkAdvisorOrPrincipal, async (req, res)
 });
 
 // 📌 DELETE Student (Advisor/Principal only)
-router.delete("/delete/:id", verifyToken, checkAdvisorOrPrincipal, async (req, res) => {
+router.delete("/delete/:id", verifyToken,  async (req, res) => {
   try {
     const student = await Student.findByPk(req.params.id);
     if (!student) {
