@@ -27,7 +27,6 @@
             background: rgba(26, 58, 82, 0.7) !important;
         }
 
-        /* Background with college campus image */
         body::before {
             content: '';
             position: fixed;
@@ -44,7 +43,6 @@
             opacity: 1;
         }
 
-        /* Overlay for better contrast */
         body::after {
             content: '';
             position: fixed;
@@ -118,12 +116,6 @@
             object-fit: contain;
             background: transparent;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-        }
-
-        .logo-text {
-            font-size: 40px;
-            color: white;
-            font-weight: bold;
         }
 
         .college-name {
@@ -347,7 +339,6 @@
             }
         }
 
-        /* Register Modal */
         .modal {
             display: none;
             position: fixed;
@@ -452,10 +443,6 @@
                 height: 70px;
             }
 
-            .logo-text {
-                font-size: 35px;
-            }
-
             .checkbox-group {
                 flex-direction: column;
                 gap: 12px;
@@ -471,10 +458,8 @@
 <body>
     <div class="container">
         <div class="login-card">
-            <!-- Error Message -->
             <div class="error-message" id="errorMessage"></div>
 
-            <!-- Logo & College Info -->
             <div class="logo-section">
                 <div class="logo">
                     <img src="/images/pgp-logo-1.png" alt="PGP GROUP Logo" style="width: 100%; height: 100%; object-fit: contain;">
@@ -483,7 +468,6 @@
                 <div class="tagline">ATTENDANCE TRACKER SYSTEM</div>
             </div>
 
-            <!-- Login Form -->
             <form id="loginForm">
                 <div class="form-group">
                     <label for="email">Email or Username</label>
@@ -521,22 +505,18 @@
                 <button type="submit" class="login-btn">Login</button>
             </form>
 
-            <!-- Divider -->
             <div class="divider">or</div>
 
-            <!-- Register Link -->
             <div class="signup-link">
                 Don't have an account? <a id="registerLink">Register here</a>
             </div>
 
-            <!-- Footer -->
             <div class="footer-text">
                 © 2025 PGP Attendance Tracker
             </div>
         </div>
     </div>
 
-    <!-- Register Modal -->
     <div class="modal" id="registerModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -682,51 +662,70 @@
             }
         });
 
-        // ✅✅✅ FIXED LOGIN FORM - THIS IS THE IMPORTANT PART ✅✅✅
+        // ✅✅✅ FIXED LOGIN FORM HANDLER ✅✅✅
         document.getElementById('loginForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const rememberMe = document.getElementById('remember').checked;
-    
-    const loginBtn = document.querySelector('.login-btn');
-    loginBtn.textContent = 'Logging in...';
-    loginBtn.disabled = true;
-    
-    fetch('/auth/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if(data.success) {
-            // ✅ Save token and user info
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('userName', data.user.name);
-            localStorage.setItem('userRole', data.user.role);
+            e.preventDefault();
             
-            if(rememberMe) {
-                localStorage.setItem('rememberEmail', email);
-            }
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('remember').checked;
             
-            // ✅ Redirect to dashboard
-            window.location.href = "/dashboard";
-        } else {
-            alert(data.message || 'Invalid credentials');
-            loginBtn.textContent = 'Login';
-            loginBtn.disabled = false;
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Login failed. Please try again.');
-        loginBtn.textContent = 'Login';
-        loginBtn.disabled = false;
-    });
-});
+            const loginBtn = document.querySelector('.login-btn');
+            
+            loginBtn.textContent = 'Logging in...';
+            loginBtn.disabled = true;
+            errorMessage.classList.remove('show');
+            
+            fetch('/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Login failed');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if(data.success && data.token) {
+                    // ✅ Save to localStorage
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('userName', data.user.name);
+                    localStorage.setItem('userRole', data.user.role);
+                    localStorage.setItem('authToken', data.token);
+                    
+                    if(rememberMe) {
+                        localStorage.setItem('rememberEmail', email);
+                    }
+                    
+                    console.log('✅ Login successful! Redirecting to dashboard...');
+                    
+                    // ✅ Redirect to dashboard
+                    window.location.href = '/dashboard';
+                } else {
+                    throw new Error(data.message || 'Invalid response from server');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Login error:', error);
+                
+                errorMessage.textContent = error.message || 'Login failed. Please try again.';
+                errorMessage.classList.add('show');
+                
+                document.body.classList.add('error-state');
+                setTimeout(() => {
+                    document.body.classList.remove('error-state');
+                }, 300);
+                
+                loginBtn.textContent = 'Login';
+                loginBtn.disabled = false;
+            });
+        });
 
         // Register form
         document.getElementById('registerForm').addEventListener('submit', function(e) {
@@ -759,7 +758,6 @@
                     alert('Registration successful! Please login.');
                     registerModal.classList.remove('show');
                     document.getElementById('registerForm').reset();
-                    // Auto-fill email in login form
                     document.getElementById('email').value = email;
                 } else {
                     alert(data.message || 'Registration failed');

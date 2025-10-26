@@ -20,40 +20,16 @@ const PORT = process.env.PORT || 3000;
 const { Student, User, Timetable, sequelize } = require("./models");
 
 // ========================================
-// 🔐 AUTH MIDDLEWARE
+// ⚙️ MIDDLEWARE
 // ========================================
-const authenticateToken = (req, res, next) => {
-    const token = req.cookies?.token || req.headers["authorization"]?.split(" ")[1];
+app.use(cors());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "public")));
 
-    const isProtectedPage = req.originalUrl.includes('/dashboard') || 
-                            req.originalUrl.includes('/student-management') || 
-                            req.originalUrl.includes('/reports-page') || 
-                            req.originalUrl === '/'; 
-
-    if (!token) {
-        if (isProtectedPage) {
-            console.log('No token found for page request. Redirecting to login.');
-            res.cookie('redirect', req.originalUrl, { httpOnly: false, maxAge: 60000 }); 
-            return res.redirect('/login');
-        }
-        return res.status(401).json({ success: false, message: "No token provided" });
-    }
-
-    try {
-        const verified = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = verified;
-        next();
-    } catch (err) {
-        console.log('Invalid token. Clearing cookie.');
-        res.clearCookie('token');
-        
-        if (isProtectedPage) {
-            console.log('Invalid token for page request. Redirecting to login.');
-            return res.redirect('/login');
-        }
-        return res.status(403).json({ success: false, message: "Invalid token" });
-    }
-};
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
 // ========================================
 // 🧠 DATABASE SEEDING
@@ -93,14 +69,27 @@ const seedDatabase = async () => {
                     password: hashedPassword,
                     role: "teacher",
                 },
+                {
+                    staffId: "ADV001",
+                    name: "Advisor Mary",
+                    email: "advisor@pgp.com",
+                    password: hashedPassword,
+                    role: "advisor",
+                },
+                {
+                    staffId: "PRI001",
+                    name: "Principal Smith",
+                    email: "principal@pgp.com",
+                    password: hashedPassword,
+                    role: "principal",
+                },
             ]);
-            console.log("👥 Demo users added (Admin + Teacher)");
+            console.log("👥 Demo users added");
             console.log("\n✅ LOGIN CREDENTIALS:");
-            console.log("   📧 Email: teacher@pgp.com");
-            console.log("   🔑 Password: password123");
-            console.log("   OR");
-            console.log("   📧 Email: admin@pgp.com");
-            console.log("   🔑 Password: password123\n");
+            console.log("   📧 Teacher: teacher@pgp.com | 🔑 password123");
+            console.log("   📧 Advisor: advisor@pgp.com | 🔑 password123");
+            console.log("   📧 Principal: principal@pgp.com | 🔑 password123");
+            console.log("   📧 Admin: admin@pgp.com | 🔑 password123\n");
         } else {
             console.log("📝 Users already exist in database");
         }
@@ -115,18 +104,6 @@ setTimeout(() => {
 }, 2000);
 
 // ========================================
-// ⚙️ MIDDLEWARE
-// ========================================
-app.use(cors());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));
-
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
-
-// ========================================
 // 🌐 API ROUTES
 // ========================================
 const authRoutes = require("./routes/auth");
@@ -134,24 +111,52 @@ const attendanceRoutes = require("./routes/attendance");
 const dashboardRoutes = require("./routes/dashboard");
 const studentsRoutes = require("./routes/students");
 const reportsRoutes = require("./routes/reports");
+const timetableRoutes = require("./routes/timetable");
 
-// API Routes (with /auth prefix for auth)
-app.use("/auth", authRoutes); // Changed to /auth prefix
+// API Routes
+app.use("/auth", authRoutes);
 app.use("/attendance", attendanceRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/students", studentsRoutes);
 app.use("/reports", reportsRoutes);
+app.use("/timetable", timetableRoutes);
 
 // ========================================
-// 📄 PAGE ROUTES (EJS VIEWS)
+// 📄 PAGE ROUTES (NO AUTH MIDDLEWARE) 
+// ⚠️ IMPORTANT: No authenticateToken middleware on these routes!
+// Client-side JavaScript in each EJS file handles authentication
 // ========================================
+
+// Public routes
 app.get("/", (req, res) => res.redirect('/login'));
 app.get("/login", (req, res) => res.render("login"));
 app.get("/register", (req, res) => res.render("register"));
-app.get("/dashboard", authenticateToken, (req, res) => res.render("dashboard", { user: req.user }));
-app.get("/student-management", authenticateToken, (req, res) => res.render("student-management"));
-app.get("/reports-page", authenticateToken, (req, res) => res.render("reports"));
-app.get("/role-dashboard.html", authenticateToken, (req, res) => res.render("role-dashboard"));
+
+// Protected pages (authentication handled by client-side JavaScript)
+app.get("/dashboard", (req, res) => {
+    console.log("✅ Dashboard page accessed - rendering without server auth");
+    res.render("dashboard");
+});
+
+app.get("/student-management", (req, res) => {
+    console.log("✅ Student management page accessed - rendering without server auth");
+    res.render("student-management");
+});
+
+app.get("/reports-page", (req, res) => {
+    console.log("✅ Reports page accessed - rendering without server auth");
+    res.render("reports");
+});
+
+app.get("/role-dashboard.html", (req, res) => {
+    console.log("✅ Role dashboard page accessed - rendering without server auth");
+    res.render("role-dashboard");
+});
+
+app.get("/timetable-management", (req, res) => {
+    console.log("✅ Timetable management page accessed - rendering without server auth");
+    res.render("timetable-management");
+});
 
 // ========================================
 // 🚀 START SERVER
