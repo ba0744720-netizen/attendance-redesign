@@ -1,676 +1,2101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Teacher Dashboard | PGP</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f5f7fa;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #1abc9c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --gray: #95a5a6;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --sidebar-width: 260px;
+            --sidebar-collapsed: 70px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--primary);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            transition: all 0.3s;
+            z-index: 100;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sidebar-header .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .sidebar-header .logo span {
+            color: var(--secondary);
+        }
+        
+        .sidebar-menu {
+            padding: 15px 0;
+            flex: 1;
+        }
+        
+        .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+        }
+        
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left: 3px solid var(--secondary);
+        }
+        
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logout-btn {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: var(--border-radius);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: all 0.3s;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .top-bar {
+            background-color: white;
+            box-shadow: var(--shadow);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .toggle-sidebar {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--primary);
+            cursor: pointer;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .container {
+            flex: 1;
+            padding: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light);
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .filter-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .date-range-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: end;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        select:focus, input:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+        
+        .actions-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: var(--light);
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .verified {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--success);
+        }
+        
+        .unverified {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+        }
+        
+        .present {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--success);
+        }
+        
+        .absent {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+        }
+        
+        .action-icons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--gray);
+            font-size: 18px;
+            transition: color 0.3s;
+        }
+        
+        .icon-btn:hover {
+            color: var(--secondary);
+        }
+        
+        .verify-btn:hover {
+            color: var(--success);
+        }
+        
+        .edit-btn:hover {
+            color: var(--warning);
+        }
+        
+        .edit-attendance-btn {
+            color: #000 !important;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray);
+        }
+        
+        .modal-body {
+            margin-bottom: 25px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .copyright {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed);
+        }
+        
+        .sidebar.collapsed .logo-text,
+        .sidebar.collapsed .menu-text {
+            display: none;
+        }
+        
+        .sidebar.collapsed + .main-content {
+            margin-left: var(--sidebar-collapsed);
+        }
+        
+        .attendance-branch {
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .attendance-branch.dimmed {
+            opacity: 0.6;
+        }
+        
+        .edit-attendance-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+        }
+        
+        .attendance-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .attendance-status {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .status-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .attendance-options {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .attendance-btn {
+            width: 40px;
+            height: 40px;
+            border: 2px solid;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .present-btn {
+            border-color: var(--success);
+            color: var(--success);
+        }
+        
+        .present-btn.selected {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .absent-btn {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+        
+        .absent-btn.selected {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .attendance-summary {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--light);
+            border-radius: var(--border-radius);
+        }
+        
+        .attendance-readonly {
+    opacity: 0.6;
+    pointer-events: none;
+}
 
-    /* Header */
-    .header {
-      background: linear-gradient(135deg, #003d82 0%, #0055b8 100%);
-      color: white;
-      padding: 20px 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 10px rgba(0, 61, 130, 0.2);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
+/* Make the edit button always visible and clickable */
+.attendance-readonly #edit-attendance-btn {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
 
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .menu-btn {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 24px;
-      cursor: pointer;
-      padding: 8px;
-      border-radius: 6px;
-      transition: background 0.3s;
-    }
-
-    .header h1 {
-      font-size: 22px;
-      font-weight: 600;
-    }
-
-    .logo-section {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .logo-icon {
-      width: 32px;
-      height: 32px;
-      background: white;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .logo-icon svg {
-      stroke: #003d82;
-    }
-
-    .user-section {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .user-info {
-      text-align: right;
-    }
-
-    .user-name {
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .user-role {
-      font-size: 11px;
-      opacity: 0.85;
-      text-transform: uppercase;
-    }
-
-    .logout-btn {
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      color: white;
-      padding: 10px 24px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s;
-    }
-
-    .logout-btn:hover {
-      background: rgba(255, 255, 255, 0.25);
-    }
-
-    /* Sidebar */
-    .sidebar-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 998;
-    }
-
-    .sidebar-overlay.active {
-      display: block;
-    }
-
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: -320px;
-      width: 320px;
-      height: 100vh;
-      background: linear-gradient(to bottom, #003d82, #001f3f);
-      color: white;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
-      z-index: 999;
-      transition: left 0.3s ease;
-      overflow-y: auto;
-    }
-
-    .sidebar.active {
-      left: 0;
-    }
-
-    .sidebar-header {
-      padding: 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .sidebar-header h2 {
-      font-size: 20px;
-    }
-
-    .close-btn {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 24px;
-      cursor: pointer;
-      padding: 5px;
-      border-radius: 5px;
-    }
-
-    .close-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .sidebar-nav {
-      padding: 20px;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 15px;
-      padding: 15px;
-      margin-bottom: 10px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.3s;
-      text-decoration: none;
-      color: white;
-    }
-
-    .nav-item:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .nav-item.active {
-      background: rgba(255, 255, 255, 0.2);
-      border-left: 4px solid #ffd700;
-    }
-
-    .nav-item-icon {
-      width: 20px;
-      height: 20px;
-      margin-top: 2px;
-    }
-
-    .nav-item-content {
-      flex: 1;
-    }
-
-    .nav-item-label {
-      font-weight: 600;
-      margin-bottom: 5px;
-    }
-
-    .nav-item-desc {
-      font-size: 12px;
-      opacity: 0.8;
-    }
-
-    /* Main Content */
-    .main-content {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 40px 20px;
-    }
-
-    .page-container {
-      display: none;
-    }
-
-    .page-container.active {
-      display: block;
-      animation: fadeIn 0.3s;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Dashboard Home */
-    .welcome-section {
-      text-align: center;
-      margin-bottom: 50px;
-    }
-
-    .welcome-title {
-      font-size: 32px;
-      color: #1a1a1a;
-      font-weight: 700;
-      margin-bottom: 10px;
-    }
-
-    .welcome-subtitle {
-      font-size: 16px;
-      color: #666;
-    }
-
-    .actions-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 30px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .action-card {
-      background: white;
-      border-radius: 16px;
-      padding: 40px 30px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      cursor: pointer;
-      transition: all 0.3s;
-      text-decoration: none;
-      color: inherit;
-    }
-
-    .action-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
-    }
-
-    .card-icon {
-      width: 64px;
-      height: 64px;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 24px;
-    }
-
-    .card-icon.green {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    }
-
-    .card-icon.purple {
-      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-    }
-
-    .card-icon.blue {
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    }
-
-    .card-title {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .card-description {
-      font-size: 14px;
-      color: #666;
-    }
-
-    /* Page Sections */
-    .page-header {
-      background: white;
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      margin-bottom: 30px;
-    }
-
-    .page-title {
-      font-size: 28px;
-      font-weight: 700;
-      color: #003d82;
-      margin-bottom: 10px;
-    }
-
-    .page-url {
-      font-family: monospace;
-      background: #f0f0f0;
-      padding: 8px 12px;
-      border-radius: 6px;
-      display: inline-block;
-      margin-top: 10px;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-
-    .stat-card {
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    }
-
-    .stat-value {
-      font-size: 36px;
-      font-weight: 700;
-      color: #003d82;
-    }
-
-    .stat-label {
-      color: #666;
-      margin-top: 5px;
-    }
-  </style>
+.attendance-readonly #edit-attendance-btn i {
+    opacity: 1 !important;
+}
+        
+        .export-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: var(--sidebar-collapsed);
+            }
+            
+            .sidebar .logo-text,
+            .sidebar .menu-text {
+                display: none;
+            }
+            
+            .main-content {
+                margin-left: var(--sidebar-collapsed);
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .date-range-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions-row {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
 </head>
 <body>
-  <!-- Header -->
-  <header class="header">
-    <div class="header-left">
-      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-      <div class="logo-section">
-        <div class="logo-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-            <path d="M12 14l9-5-9-5-9 5 9 5z"/>
-            <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
-          </svg>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-graduation-cap"></i>
+            <div class="logo-text">Edu<span>Manage</span></div>
         </div>
-        <h1>PGP Attendance Tracker</h1>
-      </div>
-    </div>
-    <div class="user-section">
-      <div class="user-info">
-        <div class="user-name" id="userName">Teacher John</div>
-        <div class="user-role">TEACHER</div>
-      </div>
-      <button class="logout-btn" onclick="handleLogout()">Logout</button>
-    </div>
-  </header>
-
-  <!-- Sidebar Overlay -->
-  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <h2>Menu</h2>
-      <button class="close-btn" onclick="toggleSidebar()">✕</button>
+        
+        <div class="sidebar-menu">
+            <a href="#" class="menu-item" data-page="dashboard">
+                <i class="fas fa-home"></i>
+                <span class="menu-text">Dashboard</span>
+            </a>
+            <a href="#" class="menu-item" data-page="attendance">
+                <i class="fas fa-check-circle"></i>
+                <span class="menu-text">Mark Attendance</span>
+            </a>
+            <a href="#" class="menu-item" data-page="students">
+                <i class="fas fa-users"></i>
+                <span class="menu-text">Manage Students</span>
+            </a>
+            <a href="#" class="menu-item" data-page="reports">
+                <i class="fas fa-chart-bar"></i>
+                <span class="menu-text">View Reports</span>
+            </a>
+        </div>
+        
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="menu-text">Logout</span>
+            </button>
+        </div>
     </div>
     
-    <nav class="sidebar-nav">
-      <div class="nav-item" data-page="dashboard" onclick="navigateTo('dashboard')">
-        <div class="nav-item-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-            <polyline points="9 22 9 12 15 12 15 22"/>
-          </svg>
-        </div>
-        <div class="nav-item-content">
-          <div class="nav-item-label">Dashboard</div>
-          <div class="nav-item-desc">Home page</div>
-        </div>
-      </div>
-      
-      <div class="nav-item" data-page="mark-attendance" onclick="navigateTo('mark-attendance')">
-        <div class="nav-item-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-            <path d="M9 11l3 3L22 4"/>
-            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
-          </svg>
-        </div>
-        <div class="nav-item-content">
-          <div class="nav-item-label">Mark Attendance</div>
-          <div class="nav-item-desc">Record student attendance for today</div>
-        </div>
-      </div>
-      
-      <div class="nav-item" data-page="manage-students" onclick="navigateTo('manage-students')">
-        <div class="nav-item-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 00-3-3.87"/>
-            <path d="M16 3.13a4 4 0 010 7.75"/>
-          </svg>
-        </div>
-        <div class="nav-item-content">
-          <div class="nav-item-label">Manage Students</div>
-          <div class="nav-item-desc">Add, edit, or view student records</div>
-        </div>
-      </div>
-      
-      <div class="nav-item" data-page="reports" onclick="navigateTo('reports')">
-        <div class="nav-item-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/>
-            <polyline points="10 9 9 9 8 9"/>
-          </svg>
-        </div>
-        <div class="nav-item-content">
-          <div class="nav-item-label">View Reports</div>
-          <div class="nav-item-desc">Generate and download reports</div>
-        </div>
-      </div>
-    </nav>
-  </aside>
-
-  <!-- Main Content -->
-  <main class="main-content">
-    <!-- Dashboard Home -->
-    <div id="dashboard" class="page-container active">
-      <div class="welcome-section">
-        <h1 class="welcome-title">Welcome Back</h1>
-        <p class="welcome-subtitle">Select an action to get started</p>
-      </div>
-      
-      <div class="actions-grid">
-        <div class="action-card" onclick="navigateTo('mark-attendance')">
-          <div class="card-icon green">
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="32" height="32">
-              <path d="M9 11l3 3L22 4"/>
-              <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
-            </svg>
-          </div>
-          <h3 class="card-title">Mark Attendance</h3>
-          <p class="card-description">Record student attendance for today</p>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="top-bar">
+            <button class="toggle-sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i> John Doe
+            </div>
         </div>
         
-        <div class="action-card" onclick="navigateTo('manage-students')">
-          <div class="card-icon purple">
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="32" height="32">
-              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 00-3-3.87"/>
-              <path d="M16 3.13a4 4 0 010 7.75"/>
-            </svg>
-          </div>
-          <h3 class="card-title">Manage Students</h3>
-          <p class="card-description">Add, edit, or view student records</p>
+        <!-- Dashboard Page -->
+        <div id="dashboard" class="page active">
+            <div class="container">
+                <h1 class="page-title">Dashboard</h1>
+                
+                <div class="card">
+                    <h2>Welcome Back</h2>
+                    <p>Select an action to get started</p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+                        <div class="card" style="text-align: center; cursor: pointer;" data-page="attendance">
+                            <h3>Mark Attendance</h3>
+                            <p>Record student attendance for today</p>
+                        </div>
+                        
+                        <div class="card" style="text-align: center; cursor: pointer;" data-page="reports">
+                            <h3>View Reports</h3>
+                            <p>Generate and download reports</p>
+                        </div>
+                        
+                        <div class="card" style="text-align: center; cursor: pointer;" data-page="students">
+                            <h3>Manage Students</h3>
+                            <p>Add, edit, or view student records</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="copyright">
+                    Copyright © 2025 TNeGA. All rights reserved
+                </div>
+            </div>
         </div>
         
-        <div class="action-card" onclick="navigateTo('reports')">
-          <div class="card-icon blue">
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="32" height="32">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-            </svg>
-          </div>
-          <h3 class="card-title">View Reports</h3>
-          <p class="card-description">Generate and download reports</p>
+        <!-- Mark Attendance Page -->
+        <div id="attendance" class="page">
+            <div class="container">
+                <h1 class="page-title">Mark Attendance</h1>
+                
+                <div class="card">
+                    <h2>Today's Date: <span id="currentDate"></span></h2>
+                    
+                    <div class="filter-section">
+                        <div class="form-group">
+                            <label for="attendance-academic-year">Academic Year of Joining *</label>
+                            <select id="attendance-academic-year">
+                                <option value="">All Academic Year</option>
+                                <option value="2018-2019">2018-2019</option>
+                                <option value="2019-2020">2019-2020</option>
+                                <option value="2020-2021">2020-2021</option>
+                                <option value="2021-2022">2021-2022</option>
+                                <option value="2022-2023">2022-2023</option>
+                                <option value="2023-2024">2023-2024</option>
+                                <option value="2024-2025">2024-2025</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="attendance-course-type">Course Type *</label>
+                            <select id="attendance-course-type">
+                                <option value="">All Course Type</option>
+                                <option value="UG">UG</option>
+                                <option value="PG">PG</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="attendance-course">Course *</label>
+                            <select id="attendance-course">
+                                <option value="">All Course</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="attendance-branch">Branch *</label>
+                            <select id="attendance-branch">
+                                <option value="">All Branch</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-success" onclick="loadAttendanceStudents()">
+                        <i class="fas fa-filter"></i> Load Students
+                    </button>
+                </div>
+                
+                <div class="card" id="attendance-card">
+                    <h2>Student Attendance</h2>
+                    <div id="attendance-date" style="margin-bottom: 15px; font-weight: 600;"></div>
+                    <button class="edit-attendance-btn" id="edit-attendance-btn" style="display: none; background: none; border: none; cursor: pointer; position: absolute; top: 20px; right: 20px; z-index: 10;">
+                        <i class="fas fa-pencil-alt" style="color: #000;"></i>
+                    </button>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Register No</th>
+                                <th>Attendance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTableBody">
+                            <!-- Attendance data will be populated here -->
+                        </tbody>
+                    </table>
+                    
+                    <div class="attendance-summary">
+                        <div style="display: flex; justify-content: space-between;">
+                            <div>Total Students: <strong id="total-attendance-count">0</strong></div>
+                            <div>Present: <strong id="present-count">0</strong></div>
+                            <div>Absent: <strong id="absent-count">0</strong></div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; text-align: center;">
+                        <button class="btn btn-primary" id="submit-attendance-btn" onclick="submitAttendance()">
+                            <i class="fas fa-check"></i> Submit Attendance
+                        </button>
+                        <button class="btn btn-success" id="update-attendance-btn" onclick="updateAttendance()" style="display: none;">
+                            <i class="fas fa-sync-alt"></i> Update Attendance
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="copyright">
+                    Copyright © 2025 TNeGA. All rights reserved
+                </div>
+            </div>
         </div>
-      </div>
+        
+        <!-- Manage Students Page -->
+        <div id="students" class="page">
+            <div class="container">
+                <h1 class="page-title">Manage Students</h1>
+                
+                <div class="card">
+                    <div class="actions-row">
+                        <h2>Student Filter</h2>
+                        <button class="btn btn-primary" onclick="openAddStudentModal()">
+                            <i class="fas fa-plus"></i> Add Student
+                        </button>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <div class="form-group">
+                            <label for="academic-year">Academic Year of Joining *</label>
+                            <select id="academic-year">
+                                <option value="">All Academic Year</option>
+                                <option value="2018-2019">2018-2019</option>
+                                <option value="2019-2020">2019-2020</option>
+                                <option value="2020-2021">2020-2021</option>
+                                <option value="2021-2022">2021-2022</option>
+                                <option value="2022-2023">2022-2023</option>
+                                <option value="2023-2024">2023-2024</option>
+                                <option value="2024-2025">2024-2025</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="course-type">Course Type *</label>
+                            <select id="course-type">
+                                <option value="">All Course Type</option>
+                                <option value="UG">UG</option>
+                                <option value="PG">PG</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="course">Course *</label>
+                            <select id="course">
+                                <option value="">All Course</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="branch">Branch *</label>
+                            <select id="branch">
+                                <option value="">All Branch</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-success" onclick="loadStudents()">
+                        <i class="fas fa-filter"></i> Filter Now
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <h2>Student Details</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>Name</th>
+                                <th>Roll No</th>
+                                <th>Register No</th>
+                                <th>Admission Year</th>
+                                <th>Course Type</th>
+                                <th>Course</th>
+                                <th>Branch</th>
+                                <th>Academic Year</th>
+                                <th>Verification</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody">
+                            <!-- Student data will be populated here -->
+                        </tbody>
+                    </table>
+                    
+                    <div class="table-footer">
+                        <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>Items per page: <strong>10</strong></div>
+                            <div><strong id="showing-count">0</strong> of <strong id="total-count">0</strong></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="copyright">
+                    Copyright © 2025 TNeGA. All rights reserved
+                </div>
+            </div>
+        </div>
+        
+        <!-- View Reports Page -->
+        <div id="reports" class="page">
+            <div class="container">
+                <h1 class="page-title">View Reports</h1>
+                
+                <div class="card">
+                    <div class="actions-row">
+                        <h2>Report Filters</h2>
+                        <button class="btn btn-primary" onclick="openExportModal()">
+                            <i class="fas fa-download"></i> Export Report
+                        </button>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <div class="form-group">
+                            <label for="report-academic-year">Academic Year of Joining *</label>
+                            <select id="report-academic-year">
+                                <option value="">All Academic Year</option>
+                                <option value="2018-2019">2018-2019</option>
+                                <option value="2019-2020">2019-2020</option>
+                                <option value="2020-2021">2020-2021</option>
+                                <option value="2021-2022">2021-2022</option>
+                                <option value="2022-2023">2022-2023</option>
+                                <option value="2023-2024">2023-2024</option>
+                                <option value="2024-2025">2024-2025</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="report-course-type">Course Type *</label>
+                            <select id="report-course-type">
+                                <option value="">All Course Type</option>
+                                <option value="UG">UG</option>
+                                <option value="PG">PG</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="report-course">Course *</label>
+                            <select id="report-course">
+                                <option value="">All Course</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="report-branch">Branch *</label>
+                            <select id="report-branch">
+                                <option value="">All Branch</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="date-range-section">
+                        <div class="form-group">
+                            <label for="start-date">From Date *</label>
+                            <input type="date" id="start-date">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="end-date">To Date *</label>
+                            <input type="date" id="end-date">
+                        </div>
+                        
+                        <div class="form-group">
+                            <button class="btn btn-warning" onclick="setTodayRange()">
+                                <i class="fas fa-calendar-day"></i> Today
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-success" onclick="generateReport()">
+                        <i class="fas fa-chart-bar"></i> Show Report
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <h2>Attendance Report</h2>
+                    <div id="reportSummary">
+                        <!-- Report summary will be shown here -->
+                    </div>
+                    
+                    <table id="reportTable">
+                        <thead>
+                            <tr id="reportTableHeader">
+                                <!-- Table headers will be populated here -->
+                            </tr>
+                        </thead>
+                        <tbody id="reportTableBody">
+                            <!-- Report data will be populated here -->
+                        </tbody>
+                    </table>
+                    
+                    <div class="table-footer">
+                        <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>Items per page: <strong>10</strong></div>
+                            <div><strong id="report-showing-count">0</strong> of <strong id="report-total-count">0</strong></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="copyright">
+                    Copyright © 2025 TNeGA. All rights reserved
+                </div>
+            </div>
+        </div>
     </div>
-
-    <!-- Mark Attendance Page -->
-    <div id="mark-attendance" class="page-container">
-      <div class="page-header">
-        <h2 class="page-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
-            <path d="M9 11l3 3L22 4"/>
-            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
-          </svg>
-          Mark Attendance
-        </h2>
-        <p style="color: #666;">Current URL: <span class="page-url">/dashboard/mark-attendance</span></p>
-      </div>
-      
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-value">125</div>
-          <div class="stat-label">Total Students</div>
+    
+    <!-- Verification Modal -->
+    <div id="verificationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Verify Student</h3>
+                <button class="close-btn" onclick="closeVerificationModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to verify this student's data?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeVerificationModal()">Cancel</button>
+                <button class="btn btn-success" onclick="verifyStudent()">Verify</button>
+            </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-value">98</div>
-          <div class="stat-label">Present Today</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">27</div>
-          <div class="stat-label">Absent Today</div>
-        </div>
-      </div>
-      
-      <div style="background: white; padding: 40px; border-radius: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#003d82" stroke-width="2" width="48" height="48" style="margin: 0 auto 20px;">
-          <path d="M9 11l3 3L22 4"/>
-          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
-        </svg>
-        <p style="font-size: 18px; color: #666;">Attendance marking interface would appear here</p>
-      </div>
     </div>
-
-    <!-- Manage Students Page -->
-    <div id="manage-students" class="page-container">
-      <div class="page-header">
-        <h2 class="page-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
-            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 00-3-3.87"/>
-            <path d="M16 3.13a4 4 0 010 7.75"/>
-          </svg>
-          Manage Students
-        </h2>
-        <p style="color: #666;">Current URL: <span class="page-url">/dashboard/manage-students</span></p>
-      </div>
-      
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-value">125</div>
-          <div class="stat-label">Total Students</div>
+    
+    <!-- Add Student Modal -->
+    <div id="addStudentModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Student</h3>
+                <button class="close-btn" onclick="closeAddStudentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addStudentForm">
+                    <div class="form-group">
+                        <label for="name">Name *</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="rollNo">Roll No *</label>
+                        <input type="text" id="rollNo" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="registerNo">Register No *</label>
+                        <input type="text" id="registerNo" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="admissionYear">Admission Year *</label>
+                        <select id="admissionYear" required>
+                            <option value="">Select Admission Year</option>
+                            <option value="2018-2019">2018-2019</option>
+                            <option value="2019-2020">2019-2020</option>
+                            <option value="2020-2021">2020-2021</option>
+                            <option value="2021-2022">2021-2022</option>
+                            <option value="2022-2023">2022-2023</option>
+                            <option value="2023-2024">2023-2024</option>
+                            <option value="2024-2025">2024-2025</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="addCourseType">Course Type *</label>
+                        <select id="addCourseType" required onchange="updateAddCourseOptions()">
+                            <option value="">Select Course Type</option>
+                            <option value="UG">UG</option>
+                            <option value="PG">PG</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="addCourse">Course *</label>
+                        <select id="addCourse" required onchange="updateAddBranchOptions()">
+                            <option value="">Select Course</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="addBranch">Branch *</label>
+                        <select id="addBranch" required>
+                            <option value="">Select Branch</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="academicYear">Academic Year *</label>
+                        <select id="academicYear" required>
+                            <option value="">Select Academic Year</option>
+                            <option value="I">I</option>
+                            <option value="II">II</option>
+                            <option value="III">III</option>
+                            <option value="IV">IV</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeAddStudentModal()">Cancel</button>
+                <button class="btn btn-success" onclick="addStudent()">Add Student</button>
+            </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-value">8</div>
-          <div class="stat-label">Total Classes</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">120</div>
-          <div class="stat-label">Active</div>
-        </div>
-      </div>
-      
-      <div style="background: white; padding: 40px; border-radius: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#003d82" stroke-width="2" width="48" height="48" style="margin: 0 auto 20px;">
-          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <path d="M23 21v-2a4 4 0 00-3-3.87"/>
-          <path d="M16 3.13a4 4 0 010 7.75"/>
-        </svg>
-        <p style="font-size: 18px; color: #666;">Student management interface would appear here</p>
-      </div>
     </div>
-
-    <!-- Reports Page -->
-    <div id="reports" class="page-container">
-      <div class="page-header">
-        <h2 class="page-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
-            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/>
-          </svg>
-          View Reports
-        </h2>
-        <p style="color: #666;">Current URL: <span class="page-url">/dashboard/reports</span></p>
-      </div>
-      
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-value">30</div>
-          <div class="stat-label">Days This Month</div>
+    
+    <!-- Export Modal -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Export Report</h3>
+                <button class="close-btn" onclick="closeExportModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Select export format:</p>
+                <div class="export-options">
+                    <button class="btn btn-success" onclick="exportReport('xlsx')">
+                        <i class="fas fa-file-excel"></i> Excel (XLSX)
+                    </button>
+                    <button class="btn btn-primary" onclick="exportReport('csv')">
+                        <i class="fas fa-file-csv"></i> CSV
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeExportModal()">Cancel</button>
+            </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-value">85%</div>
-          <div class="stat-label">Avg Attendance</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">12</div>
-          <div class="stat-label">Reports Generated</div>
-        </div>
-      </div>
-      
-      <div style="background: white; padding: 40px; border-radius: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#003d82" stroke-width="2" width="48" height="48" style="margin: 0 auto 20px;">
-          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-          <line x1="16" y1="13" x2="8" y2="13"/>
-          <line x1="16" y1="17" x2="8" y2="17"/>
-        </svg>
-        <p style="font-size: 18px; color: #666;">Reports interface would appear here</p>
-      </div>
     </div>
-  </main>
+    
+    <script>
+        // API Base URL - Update this with your actual backend URL
+        const API_BASE_URL = 'http://localhost:3000/api';
+        
+        // Course options based on course type
+        const courseOptions = {
+            UG: ["B.E", "B.Tech"],
+            PG: ["M.B.A", "M.C.A", "M.E"]
+        };
 
-  <script>
-    // Set user name
-    const userName = localStorage.getItem('userName') || 'Teacher John';
-    document.getElementById('userName').textContent = userName;
+        // Branch options based on course
+        const branchOptions = {
+            "B.E": ["ECE", "EEE", "MECH", "CSE", "CIVIL", "BME"],
+            "B.Tech": ["AI&DS", "IT"],
+            "M.B.A": ["Dual Specialisation"],
+            "M.C.A": ["Computer Application"],
+            "M.E": ["CSE"]
+        };
 
-    // Toggle sidebar
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('sidebarOverlay');
-      sidebar.classList.toggle('active');
-      overlay.classList.toggle('active');
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            setupNavigation();
+            setupEventListeners();
+            updateCurrentDate();
+            
+            // Set default date range for reports
+            setDefaultDateRange();
+            
+            // Setup edit attendance button
+            document.getElementById('edit-attendance-btn').addEventListener('click', function() {
+                enableAttendanceEditing();
+            });
+            
+            // Load initial data
+            loadStudents();
+        });
+
+        // Setup navigation
+        function setupNavigation() {
+            // Toggle sidebar
+            document.querySelector('.toggle-sidebar').addEventListener('click', function() {
+                document.querySelector('.sidebar').classList.toggle('collapsed');
+            });
+            
+            // Page navigation
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const pageId = this.getAttribute('data-page');
+                    navigateToPage(pageId);
+                    
+                    // Update active menu item
+                    document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Dashboard card navigation
+            document.querySelectorAll('.card[data-page]').forEach(card => {
+                card.addEventListener('click', function() {
+                    const pageId = this.getAttribute('data-page');
+                    navigateToPage(pageId);
+                    
+                    // Update active menu item
+                    document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                    document.querySelector(`.menu-item[data-page="${pageId}"]`).classList.add('active');
+                });
+            });
+        }
+        
+        // Navigate to page
+        function navigateToPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // If navigating to reports, update the reports display
+            if (pageId === 'reports') {
+                generateReport();
+            }
+        }
+
+        // Update current date
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            // Set attendance date in DD/MM/YYYY format
+            const formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+            document.getElementById('attendance-date').textContent = `Date: ${formattedDate}`;
+        }
+
+        // Setup event listeners for dynamic dropdowns
+        function setupEventListeners() {
+            // Filter section for manage students
+            document.getElementById('course-type').addEventListener('change', function() {
+                updateCourseOptions('course', this.value);
+            });
+
+            document.getElementById('course').addEventListener('change', function() {
+                updateBranchOptions('branch', this.value);
+            });
+            
+            // Filter section for attendance
+            document.getElementById('attendance-course-type').addEventListener('change', function() {
+                updateCourseOptions('attendance-course', this.value);
+            });
+
+            document.getElementById('attendance-course').addEventListener('change', function() {
+                updateBranchOptions('attendance-branch', this.value);
+            });
+            
+            // Filter section for reports
+            document.getElementById('report-course-type').addEventListener('change', function() {
+                updateCourseOptions('report-course', this.value);
+            });
+
+            document.getElementById('report-course').addEventListener('change', function() {
+                updateBranchOptions('report-branch', this.value);
+            });
+        }
+
+        // Update course options based on course type
+        function updateCourseOptions(selectId, courseType) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '<option value="">All Course</option>';
+            
+            if (courseType && courseOptions[courseType]) {
+                courseOptions[courseType].forEach(course => {
+                    const option = document.createElement('option');
+                    option.value = course;
+                    option.textContent = course;
+                    select.appendChild(option);
+                });
+            }
+        }
+
+        // Update branch options based on course
+        function updateBranchOptions(selectId, course) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '<option value="">All Branch</option>';
+            
+            if (course && branchOptions[course]) {
+                branchOptions[course].forEach(branch => {
+                    const option = document.createElement('option');
+                    option.value = branch;
+                    option.textContent = branch;
+                    select.appendChild(option);
+                });
+            }
+        }
+
+        // Update course options in add student form
+        function updateAddCourseOptions() {
+            const courseType = document.getElementById('addCourseType').value;
+            const courseSelect = document.getElementById('addCourse');
+            courseSelect.innerHTML = '<option value="">Select Course</option>';
+            
+            if (courseType && courseOptions[courseType]) {
+                courseOptions[courseType].forEach(course => {
+                    const option = document.createElement('option');
+                    option.value = course;
+                    option.textContent = course;
+                    courseSelect.appendChild(option);
+                });
+            }
+        }
+
+        // Update branch options in add student form
+        function updateAddBranchOptions() {
+            const course = document.getElementById('addCourse').value;
+            const branchSelect = document.getElementById('addBranch');
+            branchSelect.innerHTML = '<option value="">Select Branch</option>';
+            
+            if (course && branchOptions[course]) {
+                branchOptions[course].forEach(branch => {
+                    const option = document.createElement('option');
+                    option.value = branch;
+                    option.textContent = branch;
+                    branchSelect.appendChild(option);
+                });
+            }
+        }
+
+        // Load students from API
+        async function loadStudents() {
+            try {
+                // Get filter values
+                const academicYear = document.getElementById('academic-year').value;
+                const courseType = document.getElementById('course-type').value;
+                const course = document.getElementById('course').value;
+                const branch = document.getElementById('branch').value;
+                
+                // Build query string
+                const params = new URLSearchParams();
+                if (academicYear) params.append('academicYear', academicYear);
+                if (courseType) params.append('courseType', courseType);
+                if (course) params.append('course', course);
+                if (branch) params.append('branch', branch);
+                
+                // Replace with actual API call
+                // const response = await fetch(`${API_BASE_URL}/students?${params}`);
+                // const students = await response.json();
+                
+                // For demo, using localStorage
+                const students = JSON.parse(localStorage.getItem('students')) || [];
+                
+                populateStudentTable(students);
+            } catch (error) {
+                console.error('Error loading students:', error);
+                alert('Error loading students. Please try again.');
+            }
+        }
+
+        // Populate student table
+        function populateStudentTable(students) {
+            const tableBody = document.getElementById('studentTableBody');
+            tableBody.innerHTML = '';
+
+            students.forEach((student, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="action-icons">
+                        <button class="icon-btn edit-btn" title="Edit Student" onclick="openEditStudentModal(${index})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        ${!student.verified ? `<button class="icon-btn verify-btn" title="Verify Student" onclick="openVerificationModal(${index})">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </button>` : ''}
+                    </td>
+                    <td>${student.name}</td>
+                    <td>${student.rollNo}</td>
+                    <td>${student.registerNo}</td>
+                    <td>${student.admissionYear}</td>
+                    <td>${student.courseType}</td>
+                    <td>${student.course}</td>
+                    <td>${student.branch}</td>
+                    <td>${student.academicYear}</td>
+                    <td><span class="status-badge ${student.verified ? 'verified' : 'unverified'}">${student.verified ? 'Verified' : 'Unverified'}</span></td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Update table counts
+            document.getElementById('showing-count').textContent = students.length;
+            document.getElementById('total-count').textContent = students.length;
+        }
+
+        // Load attendance students based on filters
+        async function loadAttendanceStudents() {
+            try {
+                const academicYear = document.getElementById('attendance-academic-year').value;
+                const courseType = document.getElementById('attendance-course-type').value;
+                const course = document.getElementById('attendance-course').value;
+                const branch = document.getElementById('attendance-branch').value;
+                
+                // Get today's date in DD/MM/YYYY format
+                const today = new Date();
+                const formattedDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+                
+                // Build query string
+                const params = new URLSearchParams();
+                if (academicYear) params.append('academicYear', academicYear);
+                if (courseType) params.append('courseType', courseType);
+                if (course) params.append('course', course);
+                if (branch) params.append('branch', branch);
+                
+                // Replace with actual API call
+                // const response = await fetch(`${API_BASE_URL}/students?${params}`);
+                // const students = await response.json();
+                
+                // For demo, using localStorage
+                const students = JSON.parse(localStorage.getItem('students')) || [];
+                
+                // Check if attendance already exists for this branch and date
+                // Replace with actual API call
+                // const attendanceResponse = await fetch(`${API_BASE_URL}/attendance?date=${formattedDate}&branch=${branch}`);
+                // const existingRecord = await attendanceResponse.json();
+                
+                // For demo, using localStorage
+                const attendanceData = JSON.parse(localStorage.getItem('attendanceData')) || {};
+                const existingRecord = attendanceData[formattedDate] && attendanceData[formattedDate][branch];
+                
+                // Update attendance table
+                const tableBody = document.getElementById('attendanceTableBody');
+                tableBody.innerHTML = '';
+                
+                students.forEach((student, index) => {
+                    const row = document.createElement('tr');
+                    
+                    // Check if we have existing attendance for this student
+                    let existingStatus = null;
+                    if (existingRecord) {
+                        const studentAttendance = existingRecord.find(a => a.registerNo === student.registerNo);
+                        if (studentAttendance) {
+                            existingStatus = studentAttendance.status;
+                        }
+                    }
+                    
+                    row.innerHTML = `
+                        <td>${student.name}</td>
+                        <td>${student.registerNo}</td>
+                        <td>
+                            <div class="attendance-options">
+                                <div class="attendance-btn present-btn ${existingStatus === 'present' ? 'selected' : ''}" 
+                                     data-student-register="${student.registerNo}" 
+                                     onclick="markAttendance(this, 'present')">P</div>
+                                <div class="attendance-btn absent-btn ${existingStatus === 'absent' ? 'selected' : ''}" 
+                                     data-student-register="${student.registerNo}" 
+                                     onclick="markAttendance(this, 'absent')">A</div>
+                            </div>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                    // ADD THIS LINE: Initialize the row's data-attendance attribute if attendance exists
+    if (existingStatus) {
+        row.setAttribute('data-attendance', existingStatus);
     }
+                });
+                
+                // Update attendance counts
+                document.getElementById('total-attendance-count').textContent = students.length;
+                updateAttendanceCounts();
+                
+                // Show/hide edit button based on whether attendance exists
+                if (existingRecord) {
+                    document.getElementById('edit-attendance-btn').style.display = 'block';
+                    document.getElementById('submit-attendance-btn').style.display = 'none';
+                    document.getElementById('update-attendance-btn').style.display = 'none';
+                    document.getElementById('attendance-card').classList.add('attendance-readonly');
+                } else {
+                    document.getElementById('edit-attendance-btn').style.display = 'none';
+                    document.getElementById('submit-attendance-btn').style.display = 'inline-flex';
+                    document.getElementById('update-attendance-btn').style.display = 'none';
+                    document.getElementById('attendance-card').classList.remove('attendance-readonly');
+                }
+            } catch (error) {
+                console.error('Error loading attendance students:', error);
+                alert('Error loading students for attendance. Please try again.');
+            }
+        }
 
-    // Navigate to page
-    function navigateTo(page) {
-      // Hide all pages
-      document.querySelectorAll('.page-container').forEach(p => {
-        p.classList.remove('active');
-      });
-      
-      // Show selected page
-      document.getElementById(page).classList.add('active');
-      
-      // Update active nav item
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-      });
-      document.querySelector(`[data-page="${page}"]`).classList.add('active');
-      
-      // Update URL
-      const url = page === 'dashboard' ? '/dashboard' : `/dashboard/${page}`;
-      window.history.pushState({}, '', url);
-      
-      // Close sidebar
-      toggleSidebar();
-    }
+        // Enable attendance editing
+        function enableAttendanceEditing() {
+            document.getElementById('attendance-card').classList.remove('attendance-readonly');
+            document.getElementById('edit-attendance-btn').style.display = 'none';
+            document.getElementById('update-attendance-btn').style.display = 'inline-flex';
+        }
 
-    // Logout
-    function handleLogout() {
-      if(confirm('Are you sure you want to logout?')) {
-        localStorage.clear();
-        window.location.href = '/login';
-      }
-    }
+        // Mark attendance for a student
+        function markAttendance(element, status) {
+            if (document.getElementById('attendance-card').classList.contains('attendance-readonly')) {
+                return; // Don't allow changes in read-only mode
+            }
+            
+            const studentRegister = element.getAttribute('data-student-register');
+            const row = element.closest('tr');
+            
+            // Reset all buttons in this row
+            const buttons = row.querySelectorAll('.attendance-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Mark the selected button
+            element.classList.add('selected');
+            
+            // Store the attendance status in a data attribute
+            row.setAttribute('data-attendance', status);
+            
+            updateAttendanceCounts();
+        }
 
-    // Handle browser back/forward
-    window.addEventListener('popstate', function() {
-      const path = window.location.pathname;
-      const page = path.split('/').pop() || 'dashboard';
-      navigateTo(page);
-    });
-  </script>
+        // Update attendance counts
+        function updateAttendanceCounts() {
+            const rows = document.querySelectorAll('#attendanceTableBody tr');
+            let presentCount = 0;
+            let absentCount = 0;
+            
+            rows.forEach(row => {
+                const attendance = row.getAttribute('data-attendance');
+                if (attendance === 'present') {
+                    presentCount++;
+                } else if (attendance === 'absent') {
+                    absentCount++;
+                }
+            });
+            
+            document.getElementById('present-count').textContent = presentCount;
+            document.getElementById('absent-count').textContent = absentCount;
+        }
+
+        // Submit attendance
+        async function submitAttendance() {
+            const rows = document.querySelectorAll('#attendanceTableBody tr');
+            
+            // Get today's date in DD/MM/YYYY format
+            const today = new Date();
+            const formattedDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+            
+            // Get filter values
+            const branch = document.getElementById('attendance-branch').value;
+            
+            // Check if all students have attendance marked
+            let allMarked = true;
+            rows.forEach(row => {
+                if (!row.getAttribute('data-attendance')) {
+                    allMarked = false;
+                }
+            });
+            
+            if (!allMarked) {
+                alert('Please mark attendance for all students before submitting.');
+                return;
+            }
+            
+            try {
+                // Create attendance record
+                const attendanceRecord = {
+                    date: formattedDate,
+                    branch: branch,
+                    attendance: []
+                };
+                
+                rows.forEach(row => {
+                    const registerNo = row.cells[1].textContent;
+                    const attendanceStatus = row.getAttribute('data-attendance');
+                    
+                    attendanceRecord.attendance.push({
+                        registerNo: registerNo,
+                        status: attendanceStatus
+                    });
+                });
+                
+                // Replace with actual API call
+                // const response = await fetch(`${API_BASE_URL}/attendance`, {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json'
+                //     },
+                //     body: JSON.stringify(attendanceRecord)
+                // });
+                
+                // For demo, using localStorage
+                const attendanceData = JSON.parse(localStorage.getItem('attendanceData')) || {};
+                if (!attendanceData[formattedDate]) {
+                    attendanceData[formattedDate] = {};
+                }
+                attendanceData[formattedDate][branch] = attendanceRecord.attendance;
+                localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+                
+                alert('Attendance submitted successfully!');
+                
+                // Reset to read-only mode
+                document.getElementById('edit-attendance-btn').style.display = 'block';
+                document.getElementById('submit-attendance-btn').style.display = 'none';
+                document.getElementById('attendance-card').classList.add('attendance-readonly');
+            } catch (error) {
+                console.error('Error submitting attendance:', error);
+                alert('Error submitting attendance. Please try again.');
+            }
+        }
+
+        // Update attendance
+        async function updateAttendance() {
+            const rows = document.querySelectorAll('#attendanceTableBody tr');
+            
+            // Get today's date in DD/MM/YYYY format
+            const today = new Date();
+            const formattedDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+            
+            // Get filter values
+            const branch = document.getElementById('attendance-branch').value;
+            
+            // Check if all students have attendance marked
+            let allMarked = true;
+            rows.forEach(row => {
+                if (!row.getAttribute('data-attendance')) {
+                    allMarked = false;
+                }
+            });
+            
+            if (!allMarked) {
+                alert('Please mark attendance for all students before updating.');
+                return;
+            }
+            
+            try {
+                // Create updated attendance record
+                const updatedAttendance = [];
+                
+                rows.forEach(row => {
+                    const registerNo = row.cells[1].textContent;
+                    const attendanceStatus = row.getAttribute('data-attendance');
+                    
+                    updatedAttendance.push({
+                        registerNo: registerNo,
+                        status: attendanceStatus
+                    });
+                });
+                
+                // Replace with actual API call
+                // const response = await fetch(`${API_BASE_URL}/attendance`, {
+                //     method: 'PUT',
+                //     headers: {
+                //         'Content-Type': 'application/json'
+                //     },
+                //     body: JSON.stringify({
+                //         date: formattedDate,
+                //         branch: branch,
+                //         attendance: updatedAttendance
+                //     })
+                // });
+                
+                // For demo, using localStorage
+                const attendanceData = JSON.parse(localStorage.getItem('attendanceData')) || {};
+                if (!attendanceData[formattedDate]) {
+                    attendanceData[formattedDate] = {};
+                }
+                attendanceData[formattedDate][branch] = updatedAttendance;
+                localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+                
+                alert('Attendance updated successfully! Changes will be reflected in reports.');
+                
+                // Reset to read-only mode
+                document.getElementById('edit-attendance-btn').style.display = 'block';
+                document.getElementById('update-attendance-btn').style.display = 'none';
+                document.getElementById('attendance-card').classList.add('attendance-readonly');
+            } catch (error) {
+                console.error('Error updating attendance:', error);
+                alert('Error updating attendance. Please try again.');
+            }
+        }
+
+        // Set default date range for reports (last 30 days)
+        function setDefaultDateRange() {
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 30);
+            
+            document.getElementById('start-date').valueAsDate = startDate;
+            document.getElementById('end-date').valueAsDate = endDate;
+        }
+
+        // Set date range to today
+        function setTodayRange() {
+            const today = new Date();
+            document.getElementById('start-date').valueAsDate = today;
+            document.getElementById('end-date').valueAsDate = today;
+        }
+
+        // Generate report based on filters
+        async function generateReport() {
+            try {
+                const startDate = document.getElementById('start-date').value;
+                const endDate = document.getElementById('end-date').value;
+                const academicYear = document.getElementById('report-academic-year').value;
+                const courseType = document.getElementById('report-course-type').value;
+                const course = document.getElementById('report-course').value;
+                const branch = document.getElementById('report-branch').value;
+                
+                if (!startDate || !endDate) {
+                    alert('Please select date range');
+                    return;
+                }
+                
+                // Build query string
+                const params = new URLSearchParams();
+                params.append('startDate', startDate);
+                params.append('endDate', endDate);
+                if (academicYear) params.append('academicYear', academicYear);
+                if (courseType) params.append('courseType', courseType);
+                if (course) params.append('course', course);
+                if (branch) params.append('branch', branch);
+                
+                // Replace with actual API call
+                // const response = await fetch(`${API_BASE_URL}/reports?${params}`);
+                // const reportData = await response.json();
+                
+                // For demo, generate sample data
+                const students = JSON.parse(localStorage.getItem('students')) || [];
+                const attendanceData = JSON.parse(localStorage.getItem('attendanceData')) || {};
+                
+                // Filter students based on criteria
+                let filteredStudents = students;
+                
+                if (academicYear) {
+                    filteredStudents = filteredStudents.filter(student => student.admissionYear === academicYear);
+                }
+                
+                if (courseType) {
+                    filteredStudents = filteredStudents.filter(student => student.courseType === courseType);
+                }
+                
+                if (course) {
+                    filteredStudents = filteredStudents.filter(student => student.course === course);
+                }
+                
+                if (branch) {
+                    filteredStudents = filteredStudents.filter(student => student.branch === branch);
+                }
+                
+                // Check if it's a single day report
+                const isSingleDay = startDate === endDate;
+                
+                // Generate report data
+                const reportData = generateSampleReportData(filteredStudents, attendanceData, startDate, endDate, isSingleDay);
+                
+                displayReport(reportData, startDate, endDate, isSingleDay);
+            } catch (error) {
+                console.error('Error generating report:', error);
+                alert('Error generating report. Please try again.');
+            }
+        }
+
+        // Generate sample report data for demo
+        function generateSampleReportData(students, attendanceData, startDate, endDate, isSingleDay) {
+            const reportData = [];
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            
+            // Calculate total working days (days when attendance was taken for any branch)
+            let totalWorkingDays = 0;
+            const currentDate = new Date(start);
+            while (currentDate <= end) {
+                const formattedDate = `${String(currentDate.getDate()).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${currentDate.getFullYear()}`;
+                
+                // Check if attendance was taken on this day for any branch
+                if (attendanceData[formattedDate]) {
+                    totalWorkingDays++;
+                }
+                
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            students.forEach(student => {
+                // Calculate attendance data
+                let presentDays = 0;
+                let totalDaysForStudent = 0;
+                
+                // Iterate through dates in range
+                const currentDate = new Date(start);
+                while (currentDate <= end) {
+                    const formattedDate = `${String(currentDate.getDate()).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${currentDate.getFullYear()}`;
+                    
+                    // Check if attendance exists for this date and branch
+                    if (attendanceData[formattedDate] && attendanceData[formattedDate][student.branch]) {
+                        totalDaysForStudent++;
+                        const studentAttendance = attendanceData[formattedDate][student.branch].find(a => a.registerNo === student.registerNo);
+                        if (studentAttendance && studentAttendance.status === 'present') {
+                            presentDays++;
+                        }
+                    }
+                    
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+                
+                const absentDays = totalDaysForStudent - presentDays;
+                const presentPercent = totalDaysForStudent > 0 ? (presentDays / totalDaysForStudent * 100).toFixed(2) : "0.00";
+                const absentPercent = totalDaysForStudent > 0 ? (absentDays / totalDaysForStudent * 100).toFixed(2) : "0.00";
+                
+                reportData.push({
+                    name: student.name,
+                    registerNo: student.registerNo,
+                    branch: student.branch,
+                    totalDays: totalDaysForStudent,
+                    presentDays: presentDays,
+                    absentDays: absentDays,
+                    presentPercent: presentPercent,
+                    absentPercent: absentPercent
+                });
+            });
+            
+            // Add total working days to the first student's record for display
+            if (reportData.length > 0) {
+                reportData[0].totalWorkingDays = totalWorkingDays;
+            }
+            
+            return reportData;
+        }
+
+        // Display report data
+        function displayReport(reportData, startDate, endDate, isSingleDay) {
+            const reportTableBody = document.getElementById('reportTableBody');
+            const reportTableHeader = document.getElementById('reportTableHeader');
+            const reportSummary = document.getElementById('reportSummary');
+            
+            reportTableBody.innerHTML = '';
+            
+            if (isSingleDay) {
+                // Today's report format
+                const formattedDate = new Date(startDate).toLocaleDateString('en-GB');
+                
+                reportSummary.innerHTML = `
+                    <h3>Attendance Report for ${formattedDate}</h3>
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-value">${reportData.length}</div>
+                            <div class="stat-label">Total Students</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${reportData.filter(s => s.presentDays > 0).length}</div>
+                            <div class="stat-label">Total Present</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${reportData.filter(s => s.presentDays === 0).length}</div>
+                            <div class="stat-label">Total Absent</div>
+                        </div>
+                    </div>
+                `;
+                
+                // Update table headers for today's report
+                reportTableHeader.innerHTML = `
+                    <th>Name</th>
+                    <th>Register No</th>
+                    <th>Branch</th>
+                    <th>Status</th>
+                `;
+                
+                reportData.forEach(student => {
+                    const row = document.createElement('tr');
+                    const status = student.presentDays > 0 ? 'Present' : 'Absent';
+                    const statusClass = student.presentDays > 0 ? 'present' : 'absent';
+                    
+                    row.innerHTML = `
+                        <td>${student.name}</td>
+                        <td>${student.registerNo}</td>
+                        <td>${student.branch}</td>
+                        <td><span class="status-badge ${statusClass}">${status}</span></td>
+                    `;
+                    reportTableBody.appendChild(row);
+                });
+                
+                // Update table counts
+                document.getElementById('report-showing-count').textContent = reportData.length;
+                document.getElementById('report-total-count').textContent = reportData.length;
+            } else {
+                // Range report format
+                const formattedStartDate = new Date(startDate).toLocaleDateString('en-GB');
+                const formattedEndDate = new Date(endDate).toLocaleDateString('en-GB');
+                const totalWorkingDays = reportData[0] ? reportData[0].totalWorkingDays || 0 : 0;
+                
+                reportSummary.innerHTML = `
+                    <h3>Attendance Report from ${formattedStartDate} to ${formattedEndDate}</h3>
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-value">${totalWorkingDays}</div>
+                            <div class="stat-label">Total Working Days</div>
+                        </div>
+                    </div>
+                `;
+                
+                // Ensure table headers are correct for range report
+                reportTableHeader.innerHTML = `
+                    <th>Name</th>
+                    <th>Register No</th>
+                    <th>Branch</th>
+                    <th>Total Present Days</th>
+                    <th>Total Absent Days</th>
+                    <th>Present %</th>
+                    <th>Absent %</th>
+                `;
+                
+                reportData.forEach(student => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${student.name}</td>
+                        <td>${student.registerNo}</td>
+                        <td>${student.branch}</td>
+                        <td>${student.presentDays}</td>
+                        <td>${student.absentDays}</td>
+                        <td>${student.presentPercent}%</td>
+                        <td>${student.absentPercent}%</td>
+                    `;
+                    reportTableBody.appendChild(row);
+                });
+                
+                // Update table counts
+                document.getElementById('report-showing-count').textContent = reportData.length;
+                document.getElementById('report-total-count').textContent = reportData.length;
+            }
+        }
+
+        // Open export modal
+        function openExportModal() {
+            document.getElementById('exportModal').style.display = 'flex';
+        }
+
+        // Close export modal
+        function closeExportModal() {
+            document.getElementById('exportModal').style.display = 'none';
+        }
+
+        // Export report
+        function exportReport(format) {
+            // Get report data
+            const reportTableBody = document.getElementById('reportTableBody');
+            const rows = reportTableBody.querySelectorAll('tr');
+            
+            if (rows.length === 0) {
+                alert('No data to export. Please generate a report first.');
+                return;
+            }
+            
+            // Get headers
+            const headers = [];
+            document.querySelectorAll('#reportTableHeader th').forEach(th => {
+                headers.push(th.textContent);
+            });
+            
+            // Get data
+            const data = [headers];
+            rows.forEach(row => {
+                const rowData = [];
+                row.querySelectorAll('td').forEach(cell => {
+                    // Remove HTML from status badges
+                    const text = cell.textContent.replace(/Present|Absent|Verified|Unverified/g, '').trim();
+                    rowData.push(text || cell.textContent);
+                });
+                data.push(rowData);
+            });
+            
+            // Create CSV or Excel content
+            let content, mimeType, fileName;
+            
+            if (format === 'csv') {
+                content = data.map(row => 
+                    row.map(cell => `"${cell}"`).join(',')
+                ).join('\n');
+                mimeType = 'text/csv';
+                fileName = `attendance_report_${new Date().toISOString().split('T')[0]}.csv`;
+            } else {
+                // For Excel, we would typically use a library like SheetJS
+                // This is a simplified version that creates a CSV with .xlsx extension
+                content = data.map(row => 
+                    row.map(cell => `"${cell}"`).join(',')
+                ).join('\n');
+                mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                fileName = `attendance_report_${new Date().toISOString().split('T')[0]}.xlsx`;
+            }
+            
+            // Create and download file
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            closeExportModal();
+            alert(`Report exported successfully as ${format.toUpperCase()}!`);
+        }
+
+        // Modal functions
+        let currentStudentIndex = null;
+
+        function openVerificationModal(studentIndex) {
+            document.getElementById('verificationModal').style.display = 'flex';
+            currentStudentIndex = studentIndex;
+        }
+
+        function closeVerificationModal() {
+            document.getElementById('verificationModal').style.display = 'none';
+            currentStudentIndex = null;
+        }
+
+        function verifyStudent() {
+            if (currentStudentIndex !== null) {
+                // Replace with actual API call
+                // fetch(`${API_BASE_URL}/students/${currentStudentIndex}/verify`, { method: 'PUT' })
+                
+                // For demo, using localStorage
+                const students = JSON.parse(localStorage.getItem('students')) || [];
+                students[currentStudentIndex].verified = true;
+                localStorage.setItem('students', JSON.stringify(students));
+                
+                loadStudents();
+            }
+            closeVerificationModal();
+        }
+
+        function openAddStudentModal() {
+            document.getElementById('addStudentModal').style.display = 'flex';
+            document.getElementById('addStudentForm').reset();
+            // Reset dynamic dropdowns
+            document.getElementById('addCourse').innerHTML = '<option value="">Select Course</option>';
+            document.getElementById('addBranch').innerHTML = '<option value="">Select Branch</option>';
+        }
+
+        function closeAddStudentModal() {
+            document.getElementById('addStudentModal').style.display = 'none';
+        }
+
+        function openEditStudentModal(studentIndex) {
+            // This would open an edit modal similar to add student modal
+            // For now, we'll just show an alert
+            alert('Edit student functionality would be implemented here');
+        }
+
+        // Add student to database
+        async function addStudent() {
+            const form = document.getElementById('addStudentForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const newStudent = {
+                name: document.getElementById('name').value,
+                rollNo: document.getElementById('rollNo').value,
+                registerNo: document.getElementById('registerNo').value,
+                admissionYear: document.getElementById('admissionYear').value,
+                courseType: document.getElementById('addCourseType').value,
+                course: document.getElementById('addCourse').value,
+                branch: document.getElementById('addBranch').value,
+                academicYear: document.getElementById('academicYear').value,
+                verified: false
+            };
+
+            try {
+                // Replace with actual API call
+                // const response = await fetch(`${API_BASE_URL}/students`, {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json'
+                //     },
+                //     body: JSON.stringify(newStudent)
+                // });
+                
+                // For demo, using localStorage
+                const students = JSON.parse(localStorage.getItem('students')) || [];
+                students.push(newStudent);
+                localStorage.setItem('students', JSON.stringify(students));
+                
+                loadStudents();
+                closeAddStudentModal();
+                
+                alert('Student added successfully!');
+            } catch (error) {
+                console.error('Error adding student:', error);
+                alert('Error adding student. Please try again.');
+            }
+        }
+
+        // Logout function - redirect to login page
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Redirect to login page
+                window.location.href = '/login';
+            }
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const verificationModal = document.getElementById('verificationModal');
+            const addStudentModal = document.getElementById('addStudentModal');
+            const exportModal = document.getElementById('exportModal');
+            
+            if (event.target === verificationModal) {
+                closeVerificationModal();
+            }
+            
+            if (event.target === addStudentModal) {
+                closeAddStudentModal();
+            }
+            
+            if (event.target === exportModal) {
+                closeExportModal();
+            }
+        }
+    </script>
 </body>
 </html>
