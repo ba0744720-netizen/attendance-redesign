@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mark Attendance | PGP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-slideUp { animation: slideUp 0.5s ease-out; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <button onclick="goBack()" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <div>
+            <h1 class="text-2xl font-bold">🎓 Mark Attendance</h1>
+            <p class="text-blue-100 text-sm" id="currentDate">Loading...</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="text-right">
+            <div class="font-semibold" id="userName">Loading...</div>
+            <div class="text-xs text-blue-200">Teacher</div>
+          </div>
+          <button onclick="logout()" class="px-4 py-2 bg-red-500 hover:bg-red-600 rounded-lg font-semibold transition-colors">
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-7xl mx-auto p-6">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6 animate-slideUp">
+      <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-xl">
+        <div class="text-sm opacity-90 mb-2">Total Students</div>
+        <div class="text-4xl font-bold" id="totalStudents">0</div>
+      </div>
+      <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-xl">
+        <div class="text-sm opacity-90 mb-2">Present</div>
+        <div class="text-4xl font-bold" id="presentCount">0</div>
+      </div>
+      <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-6 text-white shadow-xl">
+        <div class="text-sm opacity-90 mb-2">Absent</div>
+        <div class="text-4xl font-bold" id="absentCount">0</div>
+      </div>
+      <div class="bg-gradient-to-br from-yellow-500 to-orange-500 rounded-2xl p-6 text-white shadow-xl">
+        <div class="text-sm opacity-90 mb-2">Not Marked</div>
+        <div class="text-4xl font-bold" id="notMarkedCount">0</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-2xl shadow-xl p-6 mb-6 animate-slideUp" style="animation-delay: 0.1s">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold text-gray-800">Filter Students</h2>
+        <button onclick="clearFilters()" class="text-sm px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold transition-colors">
+          Clear All
+        </button>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-5

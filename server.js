@@ -143,10 +143,12 @@ app.get("/admin/users", (req, res) => {
     console.log("✅ Admin user management accessed");
     res.render("admin-users");
 });
-// New Attendance 
+
+// New Attendance Page (Teachers & Admins)
 app.get("/new-attendance", (req, res) => {
     res.render("new-attendance");
 });
+
 // Student Management (Teachers & Admins)
 app.get("/student-management", (req, res) => {
     console.log("✅ Student management page accessed");
