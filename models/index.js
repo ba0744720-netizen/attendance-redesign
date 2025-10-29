@@ -17,7 +17,7 @@ const sequelize = process.env.DATABASE_URL
       },
       pool: {
         max: 5,
-        min: 0,
+        min: 1,
         acquire: 30000,
         idle: 10000
       }
@@ -39,90 +39,155 @@ const sequelize = process.env.DATABASE_URL
         },
         pool: {
           max: 5,
-          min: 0,
+          min: 1,
           acquire: 30000,
           idle: 10000
         }
       }
     );
 
-// Test the connection
-sequelize.authenticate()
-  .then(() => {
-    console.log("✅ Supabase PostgreSQL connected successfully!");
-    console.log(`📍 Connected to: ${sequelize.config.host || 'DATABASE_URL host'}`);
-  })
-  .catch(err => {
-    console.error("❌ Database connection error:", err.message);
-  });
-
 // ========================================
-// DEFINE MODELS (✅ Fixed - Only defined ONCE)
+// DEFINE MODELS (WITHOUT underscored: true)
 // ========================================
 
 const Student = sequelize.define("Student", {
-  name: { type: DataTypes.STRING, allowNull: false },
-  rollNumber: { type: DataTypes.STRING, allowNull: false, unique: true },
-  class: { type: DataTypes.STRING, allowNull: false },
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  name: { 
+    type: DataTypes.STRING, 
+    allowNull: false,
+    field: 'name'
+  },
+  rollNumber: { 
+    type: DataTypes.STRING, 
+    allowNull: false, 
+    unique: true,
+    field: 'rollnumber'  // ✅ Map to actual column name in DB
+  },
+  class: { 
+    type: DataTypes.STRING, 
+    allowNull: false,
+    field: 'class'
+  },
   course: { 
     type: DataTypes.STRING, 
     allowNull: true,
-    defaultValue: 'B.Tech' 
+    defaultValue: 'B.Tech',
+    field: 'course'
   },
   year: { 
     type: DataTypes.STRING, 
     allowNull: true,
-    defaultValue: 'III' 
+    defaultValue: 'III',
+    field: 'year'
   },
   branch: { 
     type: DataTypes.STRING, 
     allowNull: true,
-    defaultValue: 'CSE' 
+    defaultValue: 'CSE',
+    field: 'branch'
   }
+}, {
+  timestamps: true,
+  underscored: true,  // ✅ ENABLE for timestamps: created_at, updated_at
+  createdAt: 'created_at',
+  updatedAt: 'updated_at'
 });
 
 const Attendance = sequelize.define("Attendance", {
-  date: { type: DataTypes.DATEONLY, allowNull: false },
-  status: { type: DataTypes.STRING, allowNull: false },
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  date: { 
+    type: DataTypes.DATEONLY, 
+    allowNull: false,
+    field: 'date'
+  },
+  status: { 
+    type: DataTypes.ENUM('Present', 'Absent'), 
+    allowNull: false,
+    field: 'status'
+  },
+  StudentId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'Students',
+      key: 'id'
+    },
+    field: 'studentid'  // ✅ Map to actual column name
+  }
+}, {
+  timestamps: true,
+  underscored: false,  // ✅ IMPORTANT: Disable snake_case conversion
+  tableName: 'attendances'
 });
 
 const User = sequelize.define("User", {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
   staffId: { 
     type: DataTypes.STRING, 
     allowNull: true,
-    unique: true 
+    unique: true,
+    field: 'staff_id'  // ✅ Try staff_id with underscore
   },
-  name: { type: DataTypes.STRING, allowNull: false },
-  email: { type: DataTypes.STRING, allowNull: false, unique: true },
-  password: { type: DataTypes.STRING, allowNull: false },
+  name: { 
+    type: DataTypes.STRING, 
+    allowNull: false,
+    field: 'name'
+  },
+  email: { 
+    type: DataTypes.STRING, 
+    allowNull: false, 
+    unique: true,
+    field: 'email'
+  },
+  password: { 
+    type: DataTypes.STRING, 
+    allowNull: false,
+    field: 'password'
+  },
   role: { 
     type: DataTypes.ENUM('admin', 'teacher'), 
     allowNull: false,
-    defaultValue: 'teacher'
+    defaultValue: 'teacher',
+    field: 'role'
   },
+}, {
+  timestamps: true,
+  underscored: false,  // ✅ IMPORTANT: Disable snake_case conversion
+  tableName: 'users'
 });
 
 // ========================================
 // DEFINE RELATIONSHIPS
 // ========================================
 
-Student.hasMany(Attendance, { onDelete: "CASCADE" });
-Attendance.belongsTo(Student);
-
-// ========================================
-// SYNC DATABASE
-// ========================================
-
-sequelize.sync({ alter: true })
-  .then(() => {
-    console.log("✅ Database & tables synced with Supabase!");
-  })
-  .catch(err => {
-    console.error("❌ Database sync error:", err.message);
-  });
+Student.hasMany(Attendance, { 
+  foreignKey: 'StudentId',
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE"
+});
+Attendance.belongsTo(Student, { 
+  foreignKey: 'StudentId' 
+});
 
 // ========================================
 // EXPORT MODELS
 // ========================================
 
-module.exports = { sequelize, Student, Attendance, User };
+module.exports = { 
+  sequelize, 
+  Student, 
+  Attendance, 
+  User 
+};

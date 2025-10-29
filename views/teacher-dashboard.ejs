@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
     <title>Student Management System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -1119,8 +1121,9 @@
     </div>
     
     <script>
-        // API Base URL - Update this with your actual backend URL
-        const API_BASE_URL = 'http://localhost:3000/api';
+       // Replace with your actual values from Supabase Settings → API
+    const SUPABASE_URL = 'https://rrtddjczfvleyerqgnuo.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJydGRkamN6ZnZsZXllcnFnbnVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0MDk0MjMsImV4cCI6MjA3Njk4NTQyM30.iCoMyfjRExdeOaKIt4UkMu9lHIcviSsTINyhwzwftPQ';
         
         // Course options based on course type
         const courseOptions = {
@@ -2096,6 +2099,9 @@
                 closeExportModal();
             }
         }
+        // note: the CDN exposes a global "supabase" namespace with createClient
+    window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     </script>
+    <script src="app.js"></script>
 </body>
 </html>
